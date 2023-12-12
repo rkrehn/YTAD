@@ -216,7 +216,6 @@
             // 
             // timer_save
             // 
-            timer_save.Enabled = true;
             timer_save.Interval = 30000;
             timer_save.Tick += timer_save_Tick;
             // 

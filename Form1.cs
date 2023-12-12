@@ -138,36 +138,45 @@ namespace YTPD
                         Directory.CreateDirectory(txt_Dir.Text + "\\" + GetValidFilename(artist) + "\\" + GetValidFilename(album));
                     }
 
-                    // get the manifest information
-                    var youtube = new YoutubeClient();
-                    var streamManifest = await youtube.Videos.Streams.GetManifestAsync(link);
-                    var streamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
-
-                    // set the path
-                    string fullpath = Path.Combine(txt_Dir.Text + "\\" + GetValidFilename(artist) + "\\" + GetValidFilename(album), songnum + " - " + GetValidFilename(song) + "." + streamInfo.Container);
-
-                    if (System.IO.File.Exists(fullpath))
-                    {
-                        row.Cells["DL"].Value = "100";
-                        break;
-                    }
-
                     // highlight the row being used
                     dgv_downloads.Rows[row.Index].DefaultCellStyle.BackColor = Color.SteelBlue;
                     dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.Azure;
                     dgv_downloads.FirstDisplayedScrollingRowIndex = row.Index;
 
-                    var progress = new Progress<double>(percentage =>
+                    // get the manifest information
+                    try
                     {
-                        row.Cells["DL"].Value = Math.Round(percentage * 100, 0);
-                    });
+                        var youtube = new YoutubeClient();
+                        var streamManifest = await youtube.Videos.Streams.GetManifestAsync(link);
+                        var streamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
 
-                    // actual stream
-                    var stream = await youtube.Videos.Streams.GetAsync(streamInfo);
-                    await youtube.Videos.Streams.DownloadAsync(streamInfo, fullpath, progress);
+                        // set the path
+                        string fullpath = Path.Combine(txt_Dir.Text + "\\" + GetValidFilename(artist) + "\\" + GetValidFilename(album), songnum + " - " + GetValidFilename(song) + "." + streamInfo.Container);
 
-                    dgv_downloads.Rows[row.Index].DefaultCellStyle.BackColor = Color.Azure;
-                    dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.Black;
+                        if (System.IO.File.Exists(fullpath))
+                        {
+                            row.Cells["DL"].Value = "100";
+                            break;
+                        }
+
+                        var progress = new Progress<double>(percentage =>
+                        {
+                            row.Cells["DL"].Value = Math.Round(percentage * 100, 0);
+                        });
+
+                        // actual stream
+                        var stream = await youtube.Videos.Streams.GetAsync(streamInfo);
+                        await youtube.Videos.Streams.DownloadAsync(streamInfo, fullpath, progress);
+
+                        dgv_downloads.Rows[row.Index].DefaultCellStyle.BackColor = Color.Azure;
+                        dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.Black;
+                    } catch {
+                        row.Cells["DL"].Value = "100";
+                        dgv_downloads.Rows[row.Index].DefaultCellStyle.BackColor = Color.DarkRed;
+                        dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.White;
+                    }
+
+                    SaveDataGridViewToCSV();
 
                     break;
                 }

@@ -1,8 +1,8 @@
-# YouTube Album Downloader
+# YouTube Album Downloader (YTAD)
 
 The software seamlessly downloads full albums from any YouTube Music playlist in the highest available MP3 format.
 
-Simply copy and paste the playlist link from YouTube Music into YTAD Downloader. With one click, it finds the best audio sources across YouTube and stitches together the full album. The software grabs the highest bitrate audio available for premium sound quality. It's perfect for use with Plex Music. 
+Simply copy and paste the playlist link from YouTube Music into YTAD. With one click, it finds the best audio sources from the related YouTube video and stitches together the full album. YTAD grabs the highest bitrate audio available for premium sound quality. It's perfect for use with [Plex Music](https://www.plex.tv/plexamp/). 
 
 ## Tutorial
 
@@ -16,14 +16,14 @@ If you're unable to watch the video, the steps are below:
 4. Paste the URL in YouTube Album Downloader at the top
 5. Click "Go"
 
-Music will begin downloading automatically into the specified folder. Subdirectories will include one subdirectory for each artist, then a subdirectory for each album, and finally the mp3s will be listed by track number and song name.
+Music will begin downloading automatically into the specified folder. Subdirectories will include one subdirectory for each artist, then a subdirectory for each album, and finally, the mp3s will be listed by track number and song name.
 
 ## Prerequisites
 
 1. Must have [ffmpeg](https://ffmpeg.org/). The exe file should be in C:\Windows\System32
 2. Must have Windows 7 or later
 3. [Download this file](https://github.com/rkrehn/YTAD/releases/tag/main)
-4. Must have an empty folder for only music
+4. Must have an empty folder dedicated for only music
 
 ## Screenshot
 

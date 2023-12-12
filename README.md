@@ -6,7 +6,9 @@ Simply copy and paste the playlist link from YouTube Music into MyTube Downloade
 
 ## Tutorial
 
-[![Watch the video](https://img.youtube.com/vi/b63SMejWNHM/0.jpg)](https://youtu.be/b63SMejWNHM)
+[!Video](YTAD.mp4)
+
+[![Watch the video on YouTube (higher quality)](https://img.youtube.com/vi/b63SMejWNHM/0.jpg)](https://youtu.be/b63SMejWNHM)
 
 If you're unable to watch the video, the steps are below:
 
@@ -24,6 +26,10 @@ Music will begin downloading automatically into the specified folder. Subdirecto
 2. Must have Windows 7 or later
 3. [Download this file](https://github.com/rkrehn/YTAD/releases/tag/main)
 4. Must have an empty folder for only music
+
+## Screenshot
+
+![Screenshot](2023-12-11_22-45.png)
 
 ## Download
 

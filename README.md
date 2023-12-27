@@ -31,7 +31,7 @@ Music will begin downloading automatically into the specified folder. Subdirecto
 
 ## Legal Disclaimer
 
-All music files downloaded through this software must be legally owned and purchased by the user. By downloading music via this software, you represent that you have purchased and fully own the rights to any downloaded content. Downloading or distributing pirated or illegal music copies is strictly prohibited. I claim no ownership rights to any downloaded music files - all such rights remain with the content owner. I accept no liability for illegal use of any files downloaded through this software. Please contact me if you have any questions about legal use of downloaded music.
+All music files downloaded through this software must be legally owned and purchased by the user. By downloading music via this software, you represent that you have purchased and fully own the rights to any downloaded content or an active subscription to YouTube Music. Downloading or distributing pirated or illegal music copies is strictly prohibited. I claim no ownership rights to any downloaded music files - all such rights remain with the content owner. I accept no liability for the illegal use of any files downloaded through this software. Please contact me if you have any questions about the legal use of downloaded music.
 
 ## Download
 

@@ -22,7 +22,7 @@ Music will begin downloading automatically into the specified folder. Subdirecto
 
 1. Must have [ffmpeg](https://ffmpeg.org/). The exe file should be in C:\Windows\System32
 2. Must have Windows 7 or later
-3. [Download this file](https://github.com/rkrehn/YTAD/releases/tag/main)
+3. [Download this file](https://github.com/rkrehn/YTAD/releases)
 4. Must have an empty folder dedicated for only music
 
 ## Screenshot

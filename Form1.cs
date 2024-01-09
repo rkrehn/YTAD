@@ -7,6 +7,7 @@ using YoutubeExplode.Videos.Streams;
 using System.Windows.Forms;
 using TagLib;
 using System.Diagnostics;
+using Microsoft.VisualBasic;
 
 namespace YTPD
 {
@@ -15,6 +16,7 @@ namespace YTPD
         public double prog = 0;
         public static bool isConverting = false;
         public static bool isPaused = false;
+        public static bool isSaving = false;
         public Form1()
         {
             InitializeComponent();
@@ -111,6 +113,11 @@ namespace YTPD
                     continue;
                 }
 
+                if(row.Cells[0].Value.ToString().ToLower().Contains("romeo"))
+                {
+                    song = "";
+                }
+
                 Int16 dlpercent = Convert.ToInt16(row.Cells["DL"].Value);
 
                 if (dlpercent > 0 && dlpercent < 100) return;
@@ -144,6 +151,7 @@ namespace YTPD
                     dgv_downloads.FirstDisplayedScrollingRowIndex = row.Index;
 
                     // get the manifest information
+                    string fullpath = "";
                     try
                     {
                         var youtube = new YoutubeClient();
@@ -151,7 +159,7 @@ namespace YTPD
                         var streamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
 
                         // set the path
-                        string fullpath = Path.Combine(txt_Dir.Text + "\\" + GetValidFilename(artist) + "\\" + GetValidFilename(album), songnum + " - " + GetValidFilename(song) + "." + streamInfo.Container);
+                        fullpath = Path.Combine(txt_Dir.Text + "\\" + GetValidFilename(artist) + "\\" + GetValidFilename(album), songnum + " - " + GetValidFilename(song) + "." + streamInfo.Container);
 
                         if (System.IO.File.Exists(fullpath))
                         {
@@ -170,10 +178,22 @@ namespace YTPD
 
                         dgv_downloads.Rows[row.Index].DefaultCellStyle.BackColor = Color.Azure;
                         dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.Black;
-                    } catch {
+                    }
+                    catch
+                    {
                         row.Cells["DL"].Value = "100";
                         dgv_downloads.Rows[row.Index].DefaultCellStyle.BackColor = Color.DarkRed;
                         dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.White;
+                    } 
+                    finally
+                    {
+                        if (!isConverting && fullpath.Length > 1)
+                        {
+                            isConverting = true;
+                            await ConvertFile(fullpath, fullpath.Substring(fullpath.LastIndexOf('.')));
+                            Console.WriteLine(fullpath);
+                            isConverting = false;
+                        }
                     }
 
                     SaveDataGridViewToCSV();
@@ -295,7 +315,9 @@ namespace YTPD
 
         private void SaveDataGridViewToCSV()
         {
+            if (isSaving == true) return; //no sense saving if it's already trying
             string filePath = Application.StartupPath + "\\grid.dat";
+            isSaving = true;
 
             try
             {
@@ -329,6 +351,10 @@ namespace YTPD
             catch (Exception ex)
             {
                 Console.WriteLine($"Error saving data: {ex.Message}");
+            }
+            finally
+            {
+                isSaving = false;
             }
         }
 
@@ -471,6 +497,77 @@ namespace YTPD
 
         private async void button3_Click(object sender, EventArgs e)
         {
+        }
+
+        private async void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (isSaving != false)
+            {
+                e.Cancel = true;
+                isPaused = true;
+                timer1.Enabled = false;
+                btn_Pause.Visible = false;
+                btn_Resume.Visible = true;
+
+                MessageBox.Show("Your progress is saving. I will pause progress and attempt to close again in [5] seconds.", "Close Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                // Use Task.Run to avoid marking the FormClosing event handler as async
+                await Task.Run(async () =>
+                {
+                    // Introduce a CancellationToken for cleanup
+                    using (var cancellationTokenSource = new CancellationTokenSource())
+                    {
+                        // Allow cancellation after 5 seconds
+                        await Task.Delay(5000, cancellationTokenSource.Token);
+
+                        // Ensure the cancellation is not already requested before closing
+                        if (!cancellationTokenSource.Token.IsCancellationRequested)
+                        {
+                            // Close the form
+                            BeginInvoke(new Action(() => Close()));
+                        }
+                    }
+                });
+            }
+        }
+
+        private void dgv_downloads_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // ensure something is actually selected
+            if (e.RowIndex >= 0 && e.RowIndex < dgv_downloads.Rows.Count)
+            {
+                int rowIndex = e.RowIndex;
+
+                // get the selected band name
+                string bandname = dgv_downloads.Rows[rowIndex].Cells[0].Value.ToString();
+
+                // correct the band name
+                string userInput = Interaction.InputBox("If the band name is incorrect, this is your chance to update it:", "YTAD", bandname);
+
+                // if null then ignore
+                if (userInput != null && userInput.Length > 1)
+                {
+                    // update band name for each row with the wrong band name
+                    foreach (DataGridViewRow row in dgv_downloads.Rows)
+                    {
+                        // no null cells!
+                        if (row.Cells[0].Value != null && row.Cells[0].Value.ToString().Length > 1)
+                        {
+                            // if the band name is the same as the one that needs correcting then correct it
+                            if (row.Cells[0].Value.ToString() == bandname)
+                            {
+                                row.Cells[0].Value = userInput;
+                            }
+                        }
+                    }
+
+                    // refresh table
+                    dgv_downloads.Refresh();
+
+                    // save
+                    SaveDataGridViewToCSV();
+                }
+            }
         }
     }
 }

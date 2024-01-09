@@ -114,6 +114,7 @@
             dgv_downloads.Size = new Size(775, 322);
             dgv_downloads.TabIndex = 3;
             dgv_downloads.CellContentClick += dgv_downloads_CellContentClick;
+            dgv_downloads.CellDoubleClick += dgv_downloads_CellDoubleClick;
             // 
             // Artist
             // 
@@ -221,7 +222,6 @@
             // 
             // timer_convert
             // 
-            timer_convert.Enabled = true;
             timer_convert.Interval = 5000;
             timer_convert.Tick += timer_convert_Tick;
             // 
@@ -268,6 +268,7 @@
             MaximizeBox = false;
             Name = "Form1";
             Text = "YouTube Album Downloader";
+            FormClosing += Form1_FormClosing;
             Load += Form1_Load;
             ((System.ComponentModel.ISupportInitialize)dgv_downloads).EndInit();
             ResumeLayout(false);

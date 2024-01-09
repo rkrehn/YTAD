@@ -35,4 +35,4 @@ All music files downloaded through this software must be legally owned and purch
 
 ## Download
 
-[Download this file](https://github.com/rkrehn/YTAD/releases/tag/main) | [Donate](https://www.paypal.com/donate/?hosted_button_id=E67KQM3NRZE6W)
+[Download This File](https://github.com/rkrehn/YTAD/releases) | [Donate](https://www.paypal.com/donate/?hosted_button_id=E67KQM3NRZE6W)

@@ -54,7 +54,12 @@
             timer_convert = new System.Windows.Forms.Timer(components);
             btn_Pause = new Button();
             btn_Resume = new Button();
+            contextMenuStrip1 = new ContextMenuStrip(components);
+            menu_cleardata = new ToolStripMenuItem();
+            openDataFileToolStripMenuItem = new ToolStripMenuItem();
+            RestartBadItems = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)dgv_downloads).BeginInit();
+            contextMenuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // label1
@@ -115,6 +120,7 @@
             dgv_downloads.TabIndex = 3;
             dgv_downloads.CellContentClick += dgv_downloads_CellContentClick;
             dgv_downloads.CellDoubleClick += dgv_downloads_CellDoubleClick;
+            dgv_downloads.MouseDown += dgv_downloads_MouseDown;
             // 
             // Artist
             // 
@@ -205,13 +211,11 @@
             // 
             // timer1
             // 
-            timer1.Enabled = true;
             timer1.Interval = 1000;
             timer1.Tick += timer1_Tick;
             // 
             // timer_tag
             // 
-            timer_tag.Enabled = true;
             timer_tag.Interval = 10000;
             timer_tag.Tick += timer_tag_Tick;
             // 
@@ -222,7 +226,7 @@
             // 
             // timer_convert
             // 
-            timer_convert.Interval = 5000;
+            timer_convert.Interval = 30000;
             timer_convert.Tick += timer_convert_Tick;
             // 
             // btn_Pause
@@ -233,6 +237,7 @@
             btn_Pause.TabIndex = 7;
             btn_Pause.Text = "Pause";
             btn_Pause.UseVisualStyleBackColor = true;
+            btn_Pause.Visible = false;
             btn_Pause.Click += btn_Pause_Click;
             // 
             // btn_Resume
@@ -243,8 +248,34 @@
             btn_Resume.TabIndex = 8;
             btn_Resume.Text = "Resume";
             btn_Resume.UseVisualStyleBackColor = true;
-            btn_Resume.Visible = false;
             btn_Resume.Click += btn_Resume_Click;
+            // 
+            // contextMenuStrip1
+            // 
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { menu_cleardata, openDataFileToolStripMenuItem, RestartBadItems });
+            contextMenuStrip1.Name = "contextMenuStrip1";
+            contextMenuStrip1.Size = new Size(213, 92);
+            // 
+            // menu_cleardata
+            // 
+            menu_cleardata.Name = "menu_cleardata";
+            menu_cleardata.Size = new Size(212, 22);
+            menu_cleardata.Text = "Clear Data";
+            menu_cleardata.Click += menu_cleardata_Click;
+            // 
+            // openDataFileToolStripMenuItem
+            // 
+            openDataFileToolStripMenuItem.Name = "openDataFileToolStripMenuItem";
+            openDataFileToolStripMenuItem.Size = new Size(212, 22);
+            openDataFileToolStripMenuItem.Text = "Open Data Folder";
+            openDataFileToolStripMenuItem.Click += openDataFileToolStripMenuItem_Click;
+            // 
+            // RestartBadItems
+            // 
+            RestartBadItems.Name = "RestartBadItems";
+            RestartBadItems.Size = new Size(212, 22);
+            RestartBadItems.Text = "Restart Broken Downloads";
+            RestartBadItems.Click += RestartBadItems_Click;
             // 
             // Form1
             // 
@@ -271,6 +302,7 @@
             FormClosing += Form1_FormClosing;
             Load += Form1_Load;
             ((System.ComponentModel.ISupportInitialize)dgv_downloads).EndInit();
+            contextMenuStrip1.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -299,5 +331,9 @@
         private DataGridViewTextBoxColumn Converted;
         private Button btn_Pause;
         private Button btn_Resume;
+        private ContextMenuStrip contextMenuStrip1;
+        private ToolStripMenuItem menu_cleardata;
+        private ToolStripMenuItem openDataFileToolStripMenuItem;
+        private ToolStripMenuItem RestartBadItems;
     }
 }

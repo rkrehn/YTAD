@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using TagLib;
 using System.Diagnostics;
 using Microsoft.VisualBasic;
+using Fastenshtein;
 
 namespace YTPD
 {
@@ -80,12 +81,10 @@ namespace YTPD
         private async void timer1_Tick(object sender, EventArgs e)
         {
             // ensure a directory exists
-            if (!Directory.Exists(txt_Dir.Text))
-            {
-                MessageBox.Show("Directory does not exist! Please browse for a new directory.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                timer1.Enabled = false;
-                return;
-            }
+            if (!Directory.Exists(txt_Dir.Text)) Directory.CreateDirectory(txt_Dir.Text);
+
+            // turn it off while it's running
+            timer1.Enabled = false;
 
             string artist = "";
             string album = "";
@@ -113,7 +112,7 @@ namespace YTPD
                     continue;
                 }
 
-                if(row.Cells[0].Value.ToString().ToLower().Contains("romeo"))
+                if (row.Cells[0].Value.ToString().ToLower().Contains("romeo"))
                 {
                     song = "";
                 }
@@ -184,7 +183,7 @@ namespace YTPD
                         row.Cells["DL"].Value = "100";
                         dgv_downloads.Rows[row.Index].DefaultCellStyle.BackColor = Color.DarkRed;
                         dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.White;
-                    } 
+                    }
                     finally
                     {
                         if (!isConverting && fullpath.Length > 1)
@@ -201,6 +200,9 @@ namespace YTPD
                     break;
                 }
             }
+
+            // turn timer back on when done
+            timer1.Enabled = true;
         }
 
         static async Task ConvertFile(string inputFilePath, string fileExt)
@@ -437,7 +439,6 @@ namespace YTPD
                 }
             }
 
-            timer1.Enabled = true;
         }
 
         private void txt_URL_TextChanged(object sender, EventArgs e)
@@ -457,14 +458,25 @@ namespace YTPD
                 .ToArray();
 
             Console.WriteLine("\nNon-mp3 files files:" + nonMp3Files.Length);
+
+            // converts non-mp3 to mp3
             foreach (string nonMp3File in nonMp3Files)
             {
-                if (!isConverting)
+                foreach (DataGridViewRow row in dgv_downloads.Rows)
                 {
-                    isConverting = true;
-                    await ConvertFile(nonMp3File, nonMp3File.Substring(nonMp3File.IndexOf('.')));
-                    Console.WriteLine(nonMp3File);
-                    isConverting = false;
+                    if (row.Cells[0].Value == null || row.Cells[0].Value.ToString().Length == 0) continue;
+                    // review levenshtein distance for mp3 file and song name so we only convert the mp3
+                    string foundsong = nonMp3File.Substring(nonMp3File.LastIndexOf('\\') + 2);
+                    foundsong = foundsong.Substring(foundsong.IndexOf('-') + 2, foundsong.LastIndexOf('.') - 4);
+                    string cellsong = row.Cells["Song"].Value.ToString();
+                    int lev = Levenshtein.Distance(foundsong, cellsong);
+
+                    // if threshold is met, then convert non-mp3 to mp3
+                    if (lev > 70)
+                    {
+                        await ConvertFile(nonMp3File, nonMp3File.Substring(nonMp3File.LastIndexOf('.')));
+                        Console.WriteLine(nonMp3File);
+                    }
                 }
             }
         }
@@ -483,6 +495,8 @@ namespace YTPD
         {
             isPaused = true;
             timer1.Enabled = false;
+            timer_convert.Enabled = false;
+            timer_tag.Enabled = false;
             btn_Pause.Visible = false;
             btn_Resume.Visible = true;
         }
@@ -491,6 +505,8 @@ namespace YTPD
         {
             isPaused = false;
             timer1.Enabled = true;
+            timer_convert.Enabled = true;
+            timer_tag.Enabled = true;
             btn_Pause.Visible = true;
             btn_Resume.Visible = false;
         }
@@ -566,6 +582,53 @@ namespace YTPD
 
                     // save
                     SaveDataGridViewToCSV();
+                }
+            }
+        }
+
+        private void btn_secret_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private void dgv_downloads_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                contextMenuStrip1.Show(MousePosition.X, MousePosition.Y);
+            }
+        }
+
+        private void menu_cleardata_Click(object sender, EventArgs e)
+        {
+            DialogResult dr = MessageBox.Show("Are you sure want to delete your data?", "YouTube Album Downloader", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+            if (dr == DialogResult.Yes)
+            {
+                dgv_downloads.Rows.Clear();
+                SaveDataGridViewToCSV();
+            }
+        }
+
+        private void btn_secret_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void openDataFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Process.Start("explorer.exe", Application.StartupPath);
+        }
+
+        private void RestartBadItems_Click(object sender, EventArgs e)
+        {
+            foreach(DataGridViewRow row in dgv_downloads.Rows)
+            {
+                if (row.Cells[0].Value == null || row.Cells[0].Value.ToString().Length == 0) continue;
+
+                if (row.Cells["Converted"].Value.ToString() == "No")
+                {
+                    row.Cells["DL"].Value = "0";
                 }
             }
         }

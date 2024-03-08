@@ -81,12 +81,7 @@ namespace YTPD
         private async void timer1_Tick(object sender, EventArgs e)
         {
             // ensure a directory exists
-            if (!Directory.Exists(txt_Dir.Text))
-            {
-                MessageBox.Show("Directory does not exist! Please browse for a new directory.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                timer1.Enabled = false;
-                return;
-            }
+            if (!Directory.Exists(txt_Dir.Text)) Directory.CreateDirectory(txt_Dir.Text);
 
             // turn it off while it's running
             timer1.Enabled = false;

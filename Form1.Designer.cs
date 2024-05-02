@@ -254,7 +254,7 @@
             // 
             contextMenuStrip1.Items.AddRange(new ToolStripItem[] { menu_cleardata, openDataFileToolStripMenuItem, RestartBadItems });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(213, 70);
+            contextMenuStrip1.Size = new Size(213, 92);
             // 
             // menu_cleardata
             // 

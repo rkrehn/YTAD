@@ -9,6 +9,8 @@ using TagLib;
 using System.Diagnostics;
 using Microsoft.VisualBasic;
 using Fastenshtein;
+using File = System.IO.File;
+using static System.Windows.Forms.LinkLabel;
 
 namespace YTPD
 {
@@ -81,12 +83,7 @@ namespace YTPD
         private async void timer1_Tick(object sender, EventArgs e)
         {
             // ensure a directory exists
-            if (!Directory.Exists(txt_Dir.Text))
-            {
-                MessageBox.Show("Directory does not exist! Please browse for a new directory.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                timer1.Enabled = false;
-                return;
-            }
+            if (!Directory.Exists(txt_Dir.Text)) Directory.CreateDirectory(txt_Dir.Text);
 
             // turn it off while it's running
             timer1.Enabled = false;
@@ -115,11 +112,6 @@ namespace YTPD
                     }
 
                     continue;
-                }
-
-                if (row.Cells[0].Value.ToString().ToLower().Contains("romeo"))
-                {
-                    song = "";
                 }
 
                 Int16 dlpercent = Convert.ToInt16(row.Cells["DL"].Value);
@@ -195,7 +187,7 @@ namespace YTPD
                         {
                             isConverting = true;
                             await ConvertFile(fullpath, fullpath.Substring(fullpath.LastIndexOf('.')));
-                            Console.WriteLine(fullpath);
+                            AppendToFile(fullpath);
                             isConverting = false;
                         }
                     }
@@ -214,6 +206,7 @@ namespace YTPD
         {
             string outputFilePath = inputFilePath.Replace(fileExt, ".mp3");
             string ffmpegcom = $"-n -i \"{inputFilePath}\" \"{outputFilePath}\"";
+            int exitCode = 1;
 
             // Setup parameters
             ProcessStartInfo psi = new ProcessStartInfo()
@@ -221,7 +214,9 @@ namespace YTPD
                 FileName = "ffmpeg",
                 Arguments = ffmpegcom,
                 CreateNoWindow = true,
-                UseShellExecute = false
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
             };
 
             // Start the process
@@ -229,36 +224,86 @@ namespace YTPD
             {
                 process.Start();
 
+                // Read the output and error streams
+                string error = process.StandardError.ReadToEnd();
+
                 // Wait for the process to exit
-                await Task.Run(() => process.WaitForExit());
+                await Task.Run(() => process.WaitForExit(1200000));
+
+                // Display the errors
+                AppendToFile("FFmpeg Errors:");
+                AppendToFile(error);
 
                 // Check the exit code
-                int exitCode = process.ExitCode;
+                exitCode = process.ExitCode;
 
-                // Handle the result based on the exit code
-                if (exitCode == 0)
+                // process errors that can skip to exit
+                if (error.Contains("No such file") || error.Contains("Invalid data") || error.Contains("already exists") || error.Contains("not in a correct format")) exitCode = 0;
+
+                // file existence errors that can be skipped
+                if (!System.IO.File.Exists(outputFilePath) || !System.IO.File.Exists(inputFilePath)) exitCode = 0;
+
+                while (process.HasExited == true || exitCode == 0)
                 {
-                    Console.WriteLine("Conversion completed successfully.");
-                    await Task.Run(() => System.IO.File.Delete(inputFilePath));
-                }
-                else
-                {
-                    Console.WriteLine($"Error: {exitCode}");
+                    if (process.HasExited == true)
+                    {
+                        break;
+                    }   else
+                    {
+                        await Task.Delay(1000);
+                        AppendToFile("Waiting for process...");
+
+                    }
                 }
             }
+
+
+            // wait to delete file
+            Int16 waitcounter = 0;
+            while (true)
+            {
+                waitcounter += 1;
+                try
+                {
+                    using (FileStream fileStream = File.OpenWrite(inputFilePath))
+                    {
+                        break; 
+                    }
+                }
+                catch (IOException)
+                {
+                    if (waitcounter > 5)
+                    {
+                        AppendToFile("I can't close the file. Giving up.");
+                        return;
+                    }
+
+                    // File is still locked or in use by another process
+                    AppendToFile("File is locked. Waiting for it to become available...");
+                    Thread.Sleep(60000); // Wait for 1 minute before retrying
+                }
+            }
+
+            // Notify file deletion
+            AppendToFile("Exit code received, deleting original file.");
+            await Task.Run(() => System.IO.File.Delete(inputFilePath));
         }
 
         private void timer_tag_Tick(object sender, EventArgs e)
         {
-            string[] artist;
-            string album = "";
-            string songnum = "";
-            string song = "";
-            string duration = "";
-            string link = "";
 
             foreach (DataGridViewRow row in dgv_downloads.Rows)
             {
+                // setup variables
+                bool FoundFile = false;
+                string[] artist = new[] { "" };
+                string album = "";
+                string songnum = "";
+                string song = "";
+                string duration = "";
+                string link = "";
+                string fullpath = "";
+
                 if (row.Cells[0].Value == null || row.Cells[0].Value == "") return;
 
                 Int16 dlpercent = Convert.ToInt16(row.Cells["DL"].Value);
@@ -272,52 +317,61 @@ namespace YTPD
                     link = row.Cells["Link"].Value.ToString();
 
                     // actual stream
-                    string fullpath = Path.Combine(txt_Dir.Text + "\\" + GetValidFilename(row.Cells["Artist"].Value.ToString()) + "\\" + GetValidFilename(album), songnum + " - " + GetValidFilename(song) + ".mp3");
+                    fullpath = Path.Combine(txt_Dir.Text + "\\" + GetValidFilename(row.Cells["Artist"].Value.ToString()) + "\\" + GetValidFilename(album), songnum + " - " + GetValidFilename(song) + ".mp3");
 
                     // does the file exist? If not, marked it tagged as the user probably moved it already
                     if (!System.IO.File.Exists(fullpath))
                     {
                         continue;
+                    } else {
+                        FoundFile = true;
                     }
 
-                    // check if file is in use
-                    bool fileInUse = true;
-                    while (fileInUse)
-                    {
-                        try
-                        {
-                            // Attempt to open the file with FileShare.None to check if it's in use
-                            using (var fileStream = new FileStream(fullpath, FileMode.Open, FileAccess.Read, FileShare.None))
-                            {
-                                // if the file can be opened, then let's write the mp3 tags
-                                fileInUse = false;
-                            }
-                        }
-                        catch (IOException)
-                        {
-                            // File is still in use, wait for a short duration before trying again
-                            continue;
-                        }
-                    }
-
-                    var tagfile = TagLib.File.Create(fullpath);
-
-                    tagfile.Tag.AlbumArtists = artist;
-                    tagfile.Tag.Artists = artist;
-                    tagfile.Tag.Album = album;
-                    tagfile.Tag.Title = song;
-                    tagfile.Tag.Comment = link;
-                    tagfile.Tag.Track = Convert.ToUInt16(songnum);
-                    tagfile.Save();
-
+                    TagFile(fullpath, artist, album, song, link, songnum);
                     row.Cells["Tagged"].Value = "1";
                     row.Cells["Converted"].Value = "Yes";
                 }
                 else if (dlpercent == 100 && row.Cells["Tagged"].Value.ToString() == "1")
                 {
                     row.Cells["Converted"].Value = "Yes";
+                } 
+            }
+        }
+
+        private void TagFile(string fullpath, string[] artist, string album, string song, string link, string songnum)
+        {
+            // check if file is in use
+            bool fileInUse = true;
+            while (fileInUse)
+            {
+                try
+                {
+                    // Attempt to open the file with FileShare.None to check if it's in use
+                    using (var fileStream = new FileStream(fullpath, FileMode.Open, FileAccess.Read, FileShare.None))
+                    {
+                        // if the file can be opened, then let's write the mp3 tags
+                        fileInUse = false;
+                    }
+                }
+                catch (IOException)
+                {
+                    // File is still in use, wait for a short duration before trying again
+                    AppendToFile(fullpath + " in use. Waiting to tag...");
+                    continue;
                 }
             }
+
+            var tagfile = TagLib.File.Create(fullpath);
+
+            tagfile.Tag.AlbumArtists = artist;
+            tagfile.Tag.Artists = artist;
+            tagfile.Tag.Album = album;
+            tagfile.Tag.Title = song;
+            tagfile.Tag.Comment = link;
+            tagfile.Tag.Track = Convert.ToUInt16(songnum);
+            tagfile.Save();
+
+            AppendToFile(fullpath + " successfully tagged with ID3. " + artist.ToString() + " > " + album + " > " + songnum + " > " + song);
         }
 
         private void SaveDataGridViewToCSV()
@@ -353,11 +407,11 @@ namespace YTPD
                     }
                 }
 
-                Console.WriteLine($"Data saved to {filePath}");
+                AppendToFile($"Data saved to {filePath}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error saving data: {ex.Message}");
+                AppendToFile($"Error saving data: {ex.Message}");
             }
             finally
             {
@@ -397,11 +451,11 @@ namespace YTPD
                 }
 
                 dgv_downloads.Refresh();
-                Console.WriteLine($"Data loaded from {filePath}");
+                AppendToFile($"Data loaded from {filePath}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading data: {ex.Message}");
+                AppendToFile($"Error loading data: {ex.Message}");
             }
         }
 
@@ -440,7 +494,7 @@ namespace YTPD
                 else
                 {
                     // Handle the case where the user canceled the dialog
-                    Console.WriteLine("Folder selection canceled by the user.");
+                    AppendToFile("Folder selection canceled by the user.");
                 }
             }
 
@@ -462,14 +516,18 @@ namespace YTPD
                 .Where(file => !file.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase))
                 .ToArray();
 
-            Console.WriteLine("\nNon-mp3 files files:" + nonMp3Files.Length);
+            if(nonMp3Files.Length == 0) return;
+            AppendToFile("\nNon-mp3 files files:" + nonMp3Files.Length);
 
             // converts non-mp3 to mp3
             foreach (string nonMp3File in nonMp3Files)
             {
+                bool SongFound = false;
+
                 foreach (DataGridViewRow row in dgv_downloads.Rows)
                 {
                     if (row.Cells[0].Value == null || row.Cells[0].Value.ToString().Length == 0) continue;
+                    
                     // review levenshtein distance for mp3 file and song name so we only convert the mp3
                     string foundsong = nonMp3File.Substring(nonMp3File.LastIndexOf('\\') + 2);
                     foundsong = foundsong.Substring(foundsong.IndexOf('-') + 2, foundsong.LastIndexOf('.') - 4);
@@ -477,11 +535,19 @@ namespace YTPD
                     int lev = Levenshtein.Distance(foundsong, cellsong);
 
                     // if threshold is met, then convert non-mp3 to mp3
-                    if (lev > 70)
+                    if (lev < 5)
                     {
+                        AppendToFile("Levenshtein threshold passed [" + lev + "] - " + nonMp3File);
                         await ConvertFile(nonMp3File, nonMp3File.Substring(nonMp3File.LastIndexOf('.')));
-                        Console.WriteLine(nonMp3File);
+                        SongFound = true;
+                        break;
                     }
+                }
+
+                if(SongFound == false)
+                {
+                    AppendToFile("Unable to find [" + nonMp3File + "'] in your downloaded songs. Attempting convert anyways...");
+                    await ConvertFile(nonMp3File, nonMp3File.Substring(nonMp3File.LastIndexOf('.')));
                 }
             }
         }
@@ -635,6 +701,33 @@ namespace YTPD
                 {
                     row.Cells["DL"].Value = "0";
                 }
+            }
+        }
+
+        public static void AppendToFile(string content)
+        {
+            string filePath = Application.StartupPath + "\\error.log";
+            if(!System.IO.File.Exists(filePath))
+                System.IO.File.Create(filePath);
+
+            // Get the current date and time
+            string dateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+            // Create the log entry with the date, time, and content
+            string logEntry = $"{dateTime} - {content}{Environment.NewLine}";
+
+            try
+            {
+                // Append the log entry to the file using StreamWriter
+                using (StreamWriter writer = File.AppendText(filePath))
+                {
+                    writer.Write(logEntry);
+                    Console.WriteLine("Log entry appended to the file successfully.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error appending to the file: {ex.Message}");
             }
         }
     }

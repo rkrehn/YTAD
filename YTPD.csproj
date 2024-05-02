@@ -24,7 +24,7 @@
     <PackageReference Include="Fastenshtein" Version="1.0.0.8" />
     <PackageReference Include="TagLibSharp" Version="2.3.0" />
     <PackageReference Include="Tools.InnoSetup" Version="6.2.2" />
-    <PackageReference Include="YoutubeExplode" Version="6.3.12" />
+    <PackageReference Include="YoutubeExplode" Version="6.3.14" />
   </ItemGroup>
 
   <ItemGroup>

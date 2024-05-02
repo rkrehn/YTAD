@@ -196,7 +196,7 @@
             txt_Dir.Name = "txt_Dir";
             txt_Dir.Size = new Size(583, 23);
             txt_Dir.TabIndex = 5;
-            txt_Dir.Text = "C:\\Users\\satsu\\Downloads";
+            txt_Dir.Text = "C:\\Downloads";
             // 
             // button2
             // 

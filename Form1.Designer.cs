@@ -58,6 +58,8 @@
             menu_cleardata = new ToolStripMenuItem();
             openDataFileToolStripMenuItem = new ToolStripMenuItem();
             RestartBadItems = new ToolStripMenuItem();
+            lbl_status = new Label();
+            timer_count = new System.Windows.Forms.Timer(components);
             ((System.ComponentModel.ISupportInitialize)dgv_downloads).BeginInit();
             contextMenuStrip1.SuspendLayout();
             SuspendLayout();
@@ -254,7 +256,7 @@
             // 
             contextMenuStrip1.Items.AddRange(new ToolStripItem[] { menu_cleardata, openDataFileToolStripMenuItem, RestartBadItems });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(213, 92);
+            contextMenuStrip1.Size = new Size(213, 70);
             // 
             // menu_cleardata
             // 
@@ -277,6 +279,21 @@
             RestartBadItems.Text = "Restart Broken Downloads";
             RestartBadItems.Click += RestartBadItems_Click;
             // 
+            // lbl_status
+            // 
+            lbl_status.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            lbl_status.Location = new Point(93, 403);
+            lbl_status.Name = "lbl_status";
+            lbl_status.Size = new Size(613, 15);
+            lbl_status.TabIndex = 9;
+            lbl_status.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // timer_count
+            // 
+            timer_count.Enabled = true;
+            timer_count.Interval = 10000;
+            timer_count.Tick += timer_count_Tick;
+            // 
             // Form1
             // 
             AcceptButton = button1;
@@ -284,6 +301,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Azure;
             ClientSize = new Size(802, 432);
+            Controls.Add(lbl_status);
             Controls.Add(btn_Resume);
             Controls.Add(btn_Pause);
             Controls.Add(button2);
@@ -298,7 +316,7 @@
             Margin = new Padding(3, 2, 3, 2);
             MaximizeBox = false;
             Name = "Form1";
-            Text = "YouTube Album Downloader";
+            Text = "YouTube Album Downloader v1.7";
             FormClosing += Form1_FormClosing;
             Load += Form1_Load;
             ((System.ComponentModel.ISupportInitialize)dgv_downloads).EndInit();
@@ -335,5 +353,7 @@
         private ToolStripMenuItem menu_cleardata;
         private ToolStripMenuItem openDataFileToolStripMenuItem;
         private ToolStripMenuItem RestartBadItems;
+        private Label lbl_status;
+        private System.Windows.Forms.Timer timer_count;
     }
 }

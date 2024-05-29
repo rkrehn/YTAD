@@ -469,7 +469,7 @@ namespace YTPD
             {
                 foreach (DataGridViewRow row in dgv_downloads.Rows)
                 {
-                    if (row.Cells[0].Value == null || row.Cells[0].Value.ToString().Length == 0) continue;
+                    if (row.Cells[0].Value == null || row.Cells[0].Value.ToString().Length == 0 || row.Cells["DL"].Value.ToString() != "100") continue;
                     // review levenshtein distance for mp3 file and song name so we only convert the mp3
                     string foundsong = nonMp3File.Substring(nonMp3File.LastIndexOf('\\') + 2);
                     foundsong = foundsong.Substring(foundsong.IndexOf('-') + 2, foundsong.LastIndexOf('.') - 4);
@@ -627,7 +627,7 @@ namespace YTPD
 
         private void RestartBadItems_Click(object sender, EventArgs e)
         {
-            foreach(DataGridViewRow row in dgv_downloads.Rows)
+            foreach (DataGridViewRow row in dgv_downloads.Rows)
             {
                 if (row.Cells[0].Value == null || row.Cells[0].Value.ToString().Length == 0) continue;
 
@@ -636,6 +636,36 @@ namespace YTPD
                     row.Cells["DL"].Value = "0";
                 }
             }
+        }
+
+        private void timer_count_Tick(object sender, EventArgs e)
+        {
+            Int32 NotStarted = 0;
+            Int32 Downloaded = 0;
+            Int32 Failed = 0;
+            Int32 Completed = 0;
+
+            foreach (DataGridViewRow row in dgv_downloads.Rows)
+            {
+                if (row.Cells[0].Value != null && row.Cells[0].Value.ToString().Length > 1)
+                {
+                    try
+                    {
+                        if (row.Cells["DL"].Value.ToString() == "0") NotStarted++;
+                        if (row.Cells["DL"].Value.ToString() == "100") Downloaded++;
+                        if (row.Cells["DL"].Value.ToString() == "100" && row.Cells["Converted"].Value.ToString() == "No") Failed++;
+                        if (row.Cells["DL"].Value.ToString() == "100" && row.Cells["Tagged"].Value.ToString() == "1") Completed++;
+                    }
+                    catch
+                    {
+                        break;
+                    }
+
+                    continue;
+                }
+            }
+
+            lbl_status.Text = "Not Started: " + NotStarted.ToString() + "  ¤  Downloaded: " + Downloaded.ToString() + "  ¤  Failed: " + Failed.ToString() + "  ¤  Completed: " + Completed.ToString();
         }
     }
 }

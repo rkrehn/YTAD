@@ -58,6 +58,7 @@
             menu_cleardata = new ToolStripMenuItem();
             openDataFileToolStripMenuItem = new ToolStripMenuItem();
             RestartBadItems = new ToolStripMenuItem();
+          
             lbl_status = new Label();
             timer_count = new System.Windows.Forms.Timer(components);
             ((System.ComponentModel.ISupportInitialize)dgv_downloads).BeginInit();
@@ -198,7 +199,7 @@
             txt_Dir.Name = "txt_Dir";
             txt_Dir.Size = new Size(583, 23);
             txt_Dir.TabIndex = 5;
-            txt_Dir.Text = "C:\\Users\\satsu\\Downloads";
+            txt_Dir.Text = "C:\\Downloads";
             // 
             // button2
             // 
@@ -257,6 +258,7 @@
             contextMenuStrip1.Items.AddRange(new ToolStripItem[] { menu_cleardata, openDataFileToolStripMenuItem, RestartBadItems });
             contextMenuStrip1.Name = "contextMenuStrip1";
             contextMenuStrip1.Size = new Size(213, 70);
+            contextMenuStrip1.Size = new Size(213, 92);
             // 
             // menu_cleardata
             // 

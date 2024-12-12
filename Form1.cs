@@ -9,6 +9,7 @@ using TagLib;
 using System.Diagnostics;
 using Microsoft.VisualBasic;
 using Fastenshtein;
+using System.IO;
 
 namespace YTPD
 {
@@ -56,18 +57,24 @@ namespace YTPD
 
             // Get all playlist videos
             Int16 songnum = 1;
-            await foreach (var video in youtube.Playlists.GetVideosAsync(txt_URL.Text))
+            try
             {
-                var title = video.Title;
-                var band = video.Author.ChannelTitle;
-                var author = video.Author;
-                var duration = video.Duration;
-                var link = video.Url;
+                await foreach (var video in youtube.Playlists.GetVideosAsync(txt_URL.Text))
+                {
+                    var title = video.Title;
+                    var band = video.Author.ChannelTitle;
+                    var author = video.Author;
+                    var duration = video.Duration;
+                    var link = video.Url;
 
-                band = band.Replace("- Topic", "").Trim();
+                    band = band.Replace("- Topic", "").Trim();
 
-                dgv_downloads.Rows.Add(band, album, songnum.ToString(), title, duration, link, "0", "0", "No");
-                songnum++;
+                    dgv_downloads.Rows.Add(band, album, songnum.ToString(), title, duration, link, "0", "0", "No");
+                    songnum++;
+                }
+            } catch (Exception ex)
+            {
+                MessageBox.Show("Unable to grab playlist: \r" + ex.ToString());
             }
 
             dgv_downloads.Refresh();
@@ -214,6 +221,28 @@ namespace YTPD
         {
             string outputFilePath = inputFilePath.Replace(fileExt, ".mp3");
             string ffmpegcom = $"-n -i \"{inputFilePath}\" \"{outputFilePath}\"";
+
+            int RetryCount = 0;
+            int MaxRetries = 60;
+
+            while(RetryCount < MaxRetries)
+            {
+                try
+                
+                {
+                    using (FileStream s = System.IO.File.Open(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.None))
+                    {
+                        s.Close();
+                        break;
+                    }
+                }
+                catch (IOException ex)
+                {
+                    System.Threading.Thread.Sleep(1000);
+                    continue;
+                }
+
+            }
 
             // Setup parameters
             ProcessStartInfo psi = new ProcessStartInfo()

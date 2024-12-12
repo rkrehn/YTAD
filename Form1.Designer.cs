@@ -29,9 +29,9 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            DataGridViewCellStyle dataGridViewCellStyle7 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle9 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle8 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             label1 = new Label();
             txt_URL = new TextBox();
             button1 = new Button();
@@ -97,24 +97,24 @@
             // 
             dgv_downloads.BackgroundColor = Color.Azure;
             dgv_downloads.BorderStyle = BorderStyle.Fixed3D;
-            dataGridViewCellStyle7.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle7.BackColor = Color.Azure;
-            dataGridViewCellStyle7.Font = new Font("Verdana", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            dataGridViewCellStyle7.ForeColor = Color.Black;
-            dataGridViewCellStyle7.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle7.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle7.WrapMode = DataGridViewTriState.True;
-            dgv_downloads.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = Color.Azure;
+            dataGridViewCellStyle1.Font = new Font("Verdana", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            dataGridViewCellStyle1.ForeColor = Color.Black;
+            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
+            dgv_downloads.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgv_downloads.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgv_downloads.Columns.AddRange(new DataGridViewColumn[] { Artist, Album, SongNum, Song, Duration, Link, DL, Tagged, Converted });
-            dataGridViewCellStyle9.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle9.BackColor = Color.Azure;
-            dataGridViewCellStyle9.Font = new Font("Verdana", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            dataGridViewCellStyle9.ForeColor = Color.Black;
-            dataGridViewCellStyle9.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle9.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle9.WrapMode = DataGridViewTriState.False;
-            dgv_downloads.DefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = Color.Azure;
+            dataGridViewCellStyle3.Font = new Font("Verdana", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            dataGridViewCellStyle3.ForeColor = Color.Black;
+            dataGridViewCellStyle3.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = DataGridViewTriState.False;
+            dgv_downloads.DefaultCellStyle = dataGridViewCellStyle3;
             dgv_downloads.Location = new Point(12, 69);
             dgv_downloads.Margin = new Padding(3, 2, 3, 2);
             dgv_downloads.Name = "dgv_downloads";
@@ -126,9 +126,9 @@
             // 
             // Artist
             // 
-            dataGridViewCellStyle8.BackColor = Color.Azure;
-            dataGridViewCellStyle8.ForeColor = Color.Black;
-            Artist.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle2.BackColor = Color.Azure;
+            dataGridViewCellStyle2.ForeColor = Color.Black;
+            Artist.DefaultCellStyle = dataGridViewCellStyle2;
             Artist.HeaderText = "Artist";
             Artist.Name = "Artist";
             Artist.Width = 150;
@@ -318,7 +318,7 @@
             Margin = new Padding(3, 2, 3, 2);
             MaximizeBox = false;
             Name = "Form1";
-            Text = "YouTube Album Downloader v1.8";
+            Text = "YouTube Album Downloader v1.9";
             FormClosing += Form1_FormClosing;
             Load += Form1_Load;
             ((System.ComponentModel.ISupportInitialize)dgv_downloads).EndInit();

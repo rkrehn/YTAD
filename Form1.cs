@@ -10,6 +10,9 @@ using System.Diagnostics;
 using Microsoft.VisualBasic;
 using Fastenshtein;
 using System.IO;
+using File = System.IO.File;
+using System.Net;
+using YoutubeExplode.Exceptions;
 
 namespace YTPD
 {
@@ -45,8 +48,9 @@ namespace YTPD
                 album = albuminfo.Title;
                 thumb = albuminfo.Thumbnails[1].Url;
             }
-            catch
+            catch (Exception ex)
             {
+                WriteError(ex.ToString());
                 MessageBox.Show("Unable to add album. Please copy/paste again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 button1.Enabled = true;
                 return;
@@ -72,8 +76,10 @@ namespace YTPD
                     dgv_downloads.Rows.Add(band, album, songnum.ToString(), title, duration, link, "0", "0", "No");
                     songnum++;
                 }
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
+                WriteError(ex.ToString());
                 MessageBox.Show("Unable to grab playlist: \r" + ex.ToString());
             }
 
@@ -116,8 +122,9 @@ namespace YTPD
                     {
                         dgv_downloads.Rows.RemoveAt(row.Index);
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        WriteError(ex.ToString());
                         break;
                     }
 
@@ -190,11 +197,13 @@ namespace YTPD
                         dgv_downloads.Rows[row.Index].DefaultCellStyle.BackColor = Color.Azure;
                         dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.Black;
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        WriteError(ex.ToString());
                         row.Cells["DL"].Value = "100";
                         dgv_downloads.Rows[row.Index].DefaultCellStyle.BackColor = Color.DarkRed;
                         dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.White;
+
                     }
                     finally
                     {
@@ -225,10 +234,10 @@ namespace YTPD
             int RetryCount = 0;
             int MaxRetries = 60;
 
-            while(RetryCount < MaxRetries)
+            while (RetryCount < MaxRetries)
             {
                 try
-                
+
                 {
                     using (FileStream s = System.IO.File.Open(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.None))
                     {
@@ -322,9 +331,10 @@ namespace YTPD
                                 fileInUse = false;
                             }
                         }
-                        catch (IOException)
+                        catch (IOException ex)
                         {
                             // File is still in use, wait for a short duration before trying again
+                            WriteError(ex.ToString());
                             continue;
                         }
                     }
@@ -386,6 +396,7 @@ namespace YTPD
             }
             catch (Exception ex)
             {
+                WriteError(ex.ToString());
                 Console.WriteLine($"Error saving data: {ex.Message}");
             }
             finally
@@ -430,6 +441,7 @@ namespace YTPD
             }
             catch (Exception ex)
             {
+                WriteError(ex.ToString());
                 Console.WriteLine($"Error loading data: {ex.Message}");
             }
         }
@@ -685,8 +697,9 @@ namespace YTPD
                         if (row.Cells["DL"].Value.ToString() == "100" && row.Cells["Converted"].Value.ToString() == "No") Failed++;
                         if (row.Cells["DL"].Value.ToString() == "100" && row.Cells["Tagged"].Value.ToString() == "1") Completed++;
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        WriteError(ex.ToString());
                         break;
                     }
 
@@ -701,6 +714,22 @@ namespace YTPD
         {
             SaveDataGridViewToCSV();
             MessageBox.Show("Your data has been saved!", "YouTube Album Downloader", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void WriteError(string msg)
+        {
+            string strFile = Application.StartupPath + "\\error.log";
+            if (!System.IO.File.Exists(strFile)) System.IO.File.Create(strFile);
+
+            using (var sr = new StreamWriter(strFile, true, Encoding.UTF8))
+            {
+                sr.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " - " + msg);
+            }
+        }
+
+        private void button3_Click_1(object sender, EventArgs e)
+        {
+
         }
     }
 }

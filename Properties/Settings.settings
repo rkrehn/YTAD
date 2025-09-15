@@ -5,5 +5,14 @@
     <Setting Name="Directory" Type="System.String" Scope="User">
       <Value Profile="(Default)">C:\Temp</Value>
     </Setting>
+    <Setting Name="AlbumData" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="CookieFile" Type="System.String" Scope="User">
+      <Value Profile="(Default)">cookies.txt</Value>
+    </Setting>
+    <Setting Name="UseCookies" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -34,7 +34,7 @@
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             label1 = new Label();
             txt_URL = new TextBox();
-            button1 = new Button();
+            btn_GetAlbum = new Button();
             dgv_downloads = new DataGridView();
             Artist = new DataGridViewTextBoxColumn();
             Album = new DataGridViewTextBoxColumn();
@@ -57,41 +57,55 @@
             menu_cleardata = new ToolStripMenuItem();
             openDataFileToolStripMenuItem = new ToolStripMenuItem();
             saveTableToolStripMenuItem = new ToolStripMenuItem();
+            correctArtistToolStripMenuItem = new ToolStripMenuItem();
+            correctAlbumToolStripMenuItem = new ToolStripMenuItem();
+            correctSongToolStripMenuItem = new ToolStripMenuItem();
             RestartBadItems = new ToolStripMenuItem();
             lbl_status = new Label();
             timer_count = new System.Windows.Forms.Timer(components);
+            btn_GetArtist = new Button();
+            webView21 = new Microsoft.Web.WebView2.WinForms.WebView2();
+            txt_Cookies = new TextBox();
+            label3 = new Label();
+            button1 = new Button();
+            chk_Cookies = new CheckBox();
+            lbl_CookieHelp = new Label();
+            lbl_YTURLHelp = new Label();
+            toolStripSeparator1 = new ToolStripSeparator();
+            toolStripSeparator2 = new ToolStripSeparator();
             ((System.ComponentModel.ISupportInitialize)dgv_downloads).BeginInit();
             contextMenuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)webView21).BeginInit();
             SuspendLayout();
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(12, 14);
+            label1.Location = new Point(15, 15);
             label1.Name = "label1";
-            label1.Size = new Size(81, 16);
+            label1.Size = new Size(60, 16);
             label1.TabIndex = 0;
-            label1.Text = "Album URL:";
+            label1.Text = "YT URL:";
             // 
             // txt_URL
             // 
-            txt_URL.Location = new Point(100, 11);
+            txt_URL.Location = new Point(81, 11);
             txt_URL.Margin = new Padding(3, 2, 3, 2);
             txt_URL.Name = "txt_URL";
-            txt_URL.Size = new Size(644, 23);
+            txt_URL.Size = new Size(524, 23);
             txt_URL.TabIndex = 1;
             txt_URL.TextChanged += txt_URL_TextChanged;
             // 
-            // button1
+            // btn_GetAlbum
             // 
-            button1.Location = new Point(750, 7);
-            button1.Margin = new Padding(3, 2, 3, 2);
-            button1.Name = "button1";
-            button1.Size = new Size(37, 25);
-            button1.TabIndex = 2;
-            button1.Text = "Go";
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
+            btn_GetAlbum.Location = new Point(611, 9);
+            btn_GetAlbum.Margin = new Padding(3, 2, 3, 2);
+            btn_GetAlbum.Name = "btn_GetAlbum";
+            btn_GetAlbum.Size = new Size(76, 25);
+            btn_GetAlbum.TabIndex = 2;
+            btn_GetAlbum.Text = "+ Album";
+            btn_GetAlbum.UseVisualStyleBackColor = true;
+            btn_GetAlbum.Click += button1_Click;
             // 
             // dgv_downloads
             // 
@@ -115,12 +129,12 @@
             dataGridViewCellStyle3.SelectionForeColor = SystemColors.HighlightText;
             dataGridViewCellStyle3.WrapMode = DataGridViewTriState.False;
             dgv_downloads.DefaultCellStyle = dataGridViewCellStyle3;
-            dgv_downloads.Location = new Point(12, 69);
+            dgv_downloads.Location = new Point(12, 98);
             dgv_downloads.Margin = new Padding(3, 2, 3, 2);
             dgv_downloads.Name = "dgv_downloads";
             dgv_downloads.Size = new Size(775, 322);
             dgv_downloads.TabIndex = 3;
-            dgv_downloads.CellContentClick += dgv_downloads_CellContentClick;
+            dgv_downloads.CellClick += dgv_downloads_CellClick;
             dgv_downloads.CellDoubleClick += dgv_downloads_CellDoubleClick;
             dgv_downloads.MouseDown += dgv_downloads_MouseDown;
             // 
@@ -179,12 +193,12 @@
             // 
             Converted.HeaderText = "Converted";
             Converted.Name = "Converted";
-            Converted.Width = 80;
+            Converted.Width = 90;
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(12, 44);
+            label2.Location = new Point(15, 45);
             label2.Name = "label2";
             label2.Size = new Size(121, 16);
             label2.TabIndex = 4;
@@ -193,7 +207,7 @@
             // txt_Dir
             // 
             txt_Dir.Enabled = false;
-            txt_Dir.Location = new Point(133, 41);
+            txt_Dir.Location = new Point(136, 42);
             txt_Dir.Margin = new Padding(3, 2, 3, 2);
             txt_Dir.Name = "txt_Dir";
             txt_Dir.Size = new Size(583, 23);
@@ -202,7 +216,7 @@
             // 
             // button2
             // 
-            button2.Location = new Point(722, 40);
+            button2.Location = new Point(725, 41);
             button2.Margin = new Padding(3, 2, 3, 2);
             button2.Name = "button2";
             button2.Size = new Size(65, 25);
@@ -228,7 +242,7 @@
             // 
             // btn_Pause
             // 
-            btn_Pause.Location = new Point(12, 400);
+            btn_Pause.Location = new Point(12, 429);
             btn_Pause.Name = "btn_Pause";
             btn_Pause.Size = new Size(75, 23);
             btn_Pause.TabIndex = 7;
@@ -239,7 +253,7 @@
             // 
             // btn_Resume
             // 
-            btn_Resume.Location = new Point(712, 400);
+            btn_Resume.Location = new Point(712, 429);
             btn_Resume.Name = "btn_Resume";
             btn_Resume.Size = new Size(75, 23);
             btn_Resume.TabIndex = 8;
@@ -249,9 +263,9 @@
             // 
             // contextMenuStrip1
             // 
-            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { menu_cleardata, openDataFileToolStripMenuItem, saveTableToolStripMenuItem, RestartBadItems });
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { menu_cleardata, openDataFileToolStripMenuItem, saveTableToolStripMenuItem, toolStripSeparator1, correctArtistToolStripMenuItem, correctAlbumToolStripMenuItem, correctSongToolStripMenuItem, toolStripSeparator2, RestartBadItems });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(213, 92);
+            contextMenuStrip1.Size = new Size(213, 170);
             // 
             // menu_cleardata
             // 
@@ -274,6 +288,27 @@
             saveTableToolStripMenuItem.Text = "Save Table";
             saveTableToolStripMenuItem.Click += saveTableToolStripMenuItem_Click;
             // 
+            // correctArtistToolStripMenuItem
+            // 
+            correctArtistToolStripMenuItem.Name = "correctArtistToolStripMenuItem";
+            correctArtistToolStripMenuItem.Size = new Size(212, 22);
+            correctArtistToolStripMenuItem.Text = "Correct Artist";
+            correctArtistToolStripMenuItem.Click += correctArtistToolStripMenuItem_Click;
+            // 
+            // correctAlbumToolStripMenuItem
+            // 
+            correctAlbumToolStripMenuItem.Name = "correctAlbumToolStripMenuItem";
+            correctAlbumToolStripMenuItem.Size = new Size(212, 22);
+            correctAlbumToolStripMenuItem.Text = "Correct Album";
+            correctAlbumToolStripMenuItem.Click += correctAlbumToolStripMenuItem_Click;
+            // 
+            // correctSongToolStripMenuItem
+            // 
+            correctSongToolStripMenuItem.Name = "correctSongToolStripMenuItem";
+            correctSongToolStripMenuItem.Size = new Size(212, 22);
+            correctSongToolStripMenuItem.Text = "Correct Song";
+            correctSongToolStripMenuItem.Click += correctSongToolStripMenuItem_Click;
+            // 
             // RestartBadItems
             // 
             RestartBadItems.Name = "RestartBadItems";
@@ -284,7 +319,7 @@
             // lbl_status
             // 
             lbl_status.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            lbl_status.Location = new Point(93, 403);
+            lbl_status.Location = new Point(96, 433);
             lbl_status.Name = "lbl_status";
             lbl_status.Size = new Size(613, 15);
             lbl_status.TabIndex = 9;
@@ -296,13 +331,122 @@
             timer_count.Interval = 10000;
             timer_count.Tick += timer_count_Tick;
             // 
+            // btn_GetArtist
+            // 
+            btn_GetArtist.Location = new Point(693, 9);
+            btn_GetArtist.Margin = new Padding(3, 2, 3, 2);
+            btn_GetArtist.Name = "btn_GetArtist";
+            btn_GetArtist.Size = new Size(75, 25);
+            btn_GetArtist.TabIndex = 12;
+            btn_GetArtist.Text = "+ Artist";
+            btn_GetArtist.UseVisualStyleBackColor = true;
+            btn_GetArtist.Click += button3_Click_2;
+            // 
+            // webView21
+            // 
+            webView21.AllowExternalDrop = true;
+            webView21.CreationProperties = null;
+            webView21.DefaultBackgroundColor = Color.White;
+            webView21.Location = new Point(778, 429);
+            webView21.Name = "webView21";
+            webView21.Size = new Size(19, 29);
+            webView21.TabIndex = 13;
+            webView21.Visible = false;
+            webView21.ZoomFactor = 1D;
+            webView21.NavigationCompleted += webView21_NavigationCompleted;
+            // 
+            // txt_Cookies
+            // 
+            txt_Cookies.Enabled = false;
+            txt_Cookies.Location = new Point(104, 69);
+            txt_Cookies.Margin = new Padding(3, 2, 3, 2);
+            txt_Cookies.Name = "txt_Cookies";
+            txt_Cookies.Size = new Size(481, 23);
+            txt_Cookies.TabIndex = 15;
+            txt_Cookies.Text = "C:\\Users\\satsu\\Downloads";
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(15, 72);
+            label3.Name = "label3";
+            label3.Size = new Size(83, 16);
+            label3.TabIndex = 14;
+            label3.Text = "Cookie File:";
+            // 
+            // button1
+            // 
+            button1.Location = new Point(591, 67);
+            button1.Margin = new Padding(3, 2, 3, 2);
+            button1.Name = "button1";
+            button1.Size = new Size(65, 25);
+            button1.TabIndex = 16;
+            button1.Text = "Browse";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click_1;
+            // 
+            // chk_Cookies
+            // 
+            chk_Cookies.AutoSize = true;
+            chk_Cookies.Location = new Point(662, 71);
+            chk_Cookies.Name = "chk_Cookies";
+            chk_Cookies.Size = new Size(105, 20);
+            chk_Cookies.TabIndex = 17;
+            chk_Cookies.Text = "Use Cookies";
+            chk_Cookies.UseVisualStyleBackColor = true;
+            chk_Cookies.CheckedChanged += chk_Cookies_CheckedChanged;
+            // 
+            // lbl_CookieHelp
+            // 
+            lbl_CookieHelp.AutoSize = true;
+            lbl_CookieHelp.BackColor = Color.DodgerBlue;
+            lbl_CookieHelp.FlatStyle = FlatStyle.Popup;
+            lbl_CookieHelp.ForeColor = Color.White;
+            lbl_CookieHelp.Location = new Point(773, 72);
+            lbl_CookieHelp.Name = "lbl_CookieHelp";
+            lbl_CookieHelp.Size = new Size(14, 16);
+            lbl_CookieHelp.TabIndex = 18;
+            lbl_CookieHelp.Text = "?";
+            lbl_CookieHelp.Click += lbl_CookieHelp_Click;
+            // 
+            // lbl_YTURLHelp
+            // 
+            lbl_YTURLHelp.AutoSize = true;
+            lbl_YTURLHelp.BackColor = Color.DodgerBlue;
+            lbl_YTURLHelp.FlatStyle = FlatStyle.Popup;
+            lbl_YTURLHelp.ForeColor = Color.White;
+            lbl_YTURLHelp.Location = new Point(774, 14);
+            lbl_YTURLHelp.Name = "lbl_YTURLHelp";
+            lbl_YTURLHelp.Size = new Size(14, 16);
+            lbl_YTURLHelp.TabIndex = 19;
+            lbl_YTURLHelp.Text = "?";
+            lbl_YTURLHelp.Click += label4_Click;
+            // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new Size(209, 6);
+            // 
+            // toolStripSeparator2
+            // 
+            toolStripSeparator2.Name = "toolStripSeparator2";
+            toolStripSeparator2.Size = new Size(209, 6);
+            // 
             // Form1
             // 
-            AcceptButton = button1;
+            AcceptButton = btn_GetAlbum;
             AutoScaleDimensions = new SizeF(8F, 16F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Azure;
-            ClientSize = new Size(802, 432);
+            ClientSize = new Size(802, 458);
+            Controls.Add(lbl_YTURLHelp);
+            Controls.Add(lbl_CookieHelp);
+            Controls.Add(chk_Cookies);
+            Controls.Add(button1);
+            Controls.Add(txt_Cookies);
+            Controls.Add(label3);
+            Controls.Add(webView21);
+            Controls.Add(btn_GetArtist);
             Controls.Add(lbl_status);
             Controls.Add(btn_Resume);
             Controls.Add(btn_Pause);
@@ -310,7 +454,7 @@
             Controls.Add(txt_Dir);
             Controls.Add(label2);
             Controls.Add(dgv_downloads);
-            Controls.Add(button1);
+            Controls.Add(btn_GetAlbum);
             Controls.Add(txt_URL);
             Controls.Add(label1);
             Font = new Font("Verdana", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -318,11 +462,12 @@
             Margin = new Padding(3, 2, 3, 2);
             MaximizeBox = false;
             Name = "Form1";
-            Text = "YouTube Album Downloader v1.11";
+            Text = "YouTube Album Downloader v2.0";
             FormClosing += Form1_FormClosing;
             Load += Form1_Load;
             ((System.ComponentModel.ISupportInitialize)dgv_downloads).EndInit();
             contextMenuStrip1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)webView21).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -331,7 +476,7 @@
 
         private Label label1;
         private TextBox txt_URL;
-        private Button button1;
+        private Button btn_GetAlbum;
         private DataGridView dgv_downloads;
         private Label label2;
         private TextBox txt_Dir;
@@ -339,15 +484,6 @@
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Timer timer_tag;
         private System.Windows.Forms.Timer timer_convert;
-        private DataGridViewTextBoxColumn Artist;
-        private DataGridViewTextBoxColumn Album;
-        private DataGridViewTextBoxColumn SongNum;
-        private DataGridViewTextBoxColumn Song;
-        private DataGridViewTextBoxColumn Duration;
-        private DataGridViewTextBoxColumn Link;
-        private DataGridViewTextBoxColumn DL;
-        private DataGridViewTextBoxColumn Tagged;
-        private DataGridViewTextBoxColumn Converted;
         private Button btn_Pause;
         private Button btn_Resume;
         private ContextMenuStrip contextMenuStrip1;
@@ -357,5 +493,28 @@
         private Label lbl_status;
         private System.Windows.Forms.Timer timer_count;
         private ToolStripMenuItem saveTableToolStripMenuItem;
+        public Button btn_GetArtist;
+        private Button button3;
+        private Microsoft.Web.WebView2.WinForms.WebView2 webView21;
+        private TextBox txt_Cookies;
+        private Label label3;
+        private Button button1;
+        private CheckBox chk_Cookies;
+        private Label lbl_CookieHelp;
+        private Label lbl_YTURLHelp;
+        private ToolStripMenuItem correctArtistToolStripMenuItem;
+        private ToolStripMenuItem correctAlbumToolStripMenuItem;
+        private ToolStripMenuItem correctSongToolStripMenuItem;
+        private DataGridViewTextBoxColumn Artist;
+        private DataGridViewTextBoxColumn Album;
+        private DataGridViewTextBoxColumn SongNum;
+        private DataGridViewTextBoxColumn Song;
+        private DataGridViewTextBoxColumn Duration;
+        private DataGridViewTextBoxColumn Link;
+        private DataGridViewTextBoxColumn DL;
+        private DataGridViewTextBoxColumn Tagged;
+        private DataGridViewTextBoxColumn Converted;
+        private ToolStripSeparator toolStripSeparator1;
+        private ToolStripSeparator toolStripSeparator2;
     }
 }

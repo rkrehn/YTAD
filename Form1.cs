@@ -326,7 +326,7 @@ namespace YTPD
                         WriteError(ex.ToString());
                         row.Cells["DL"].Value = "100";
                         dgv_downloads.Rows[row.Index].DefaultCellStyle.BackColor = Color.DarkRed;
-                        dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.White;
+                        dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.White
 
                     }
                     //finally
@@ -360,7 +360,7 @@ namespace YTPD
             // wait for the file to be free
             int RetryCount = 0;
             int MaxRetries = 60;
-
+            
             // this will force the conversion to give up after 60 seconds of trying
             while (RetryCount < MaxRetries)
             {
@@ -836,7 +836,7 @@ namespace YTPD
                 }
             }
 
-            lbl_status.Text = "Not Started: " + NotStarted.ToString() + "  ¤  Downloaded: " + Downloaded.ToString() + "  ¤  Failed: " + Failed.ToString() + "  ¤  Completed: " + Completed.ToString();
+            lbl_status.Text = "Not Started: " + NotStarted.ToString() + "  Â¤  Downloaded: " + Downloaded.ToString() + "  Â¤  Failed: " + Failed.ToString() + "  Â¤  Completed: " + Completed.ToString();
         }
 
         private void saveTableToolStripMenuItem_Click(object sender, EventArgs e)

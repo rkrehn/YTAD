@@ -59,5 +59,15 @@ namespace YTPD.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap _2025_09_11_21_34 {
+            get {
+                object obj = ResourceManager.GetObject("2025-09-11_21-34", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

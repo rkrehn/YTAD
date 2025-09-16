@@ -13,7 +13,7 @@ Simply copy and paste the playlist link from YouTube Music into YTAD. With one c
 
 ### Screenshot
 
-![Screenshot](2025-09-16_11-13)
+![Screenshot](2025-09-16_11-13.png)
 
 ## Tutorial
 ### Downloading an artist's discography

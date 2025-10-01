@@ -212,114 +212,8 @@ namespace YTPD
                         string strargument;
                         if (chk_Cookies.Checked == true)
                         {
-                            // ensure cookie file exists
-                            if (!File.Exists(txt_Cookies.Text))
-                            {
-                                PauseSystem();
-                                MessageBox.Show("Cookie file does not exist! Please select a valid cookie file or uncheck 'Use Cookies'.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                return;
-                            }
-                            // use cookies
-                            strargument = $"-o \"{fullpath}\" -i -t mp3 --cookies {txt_Cookies.Text} \"{link}\"";
-                        }
-                        else
-                        {
-                            // no cookies
-                            strargument = $"-o \"{fullpath}\" -i -t mp3 \"{link}\"";
-                        }
-
-                        // setup process info
-                        var processInfo = new ProcessStartInfo
-                        {
-                            FileName = Path.Combine(Application.StartupPath, "yt-dlp.exe"),
-                            Arguments = strargument,
-                            UseShellExecute = false,
-                            CreateNoWindow = true,
-                            WindowStyle = ProcessWindowStyle.Hidden,
-                            RedirectStandardOutput = true,
-                            RedirectStandardError = true,
-                            RedirectStandardInput = false
-                        };
-
-                        using var process2 = Process.Start(processInfo);
-
-                        // Simple regex to catch download percentage
-                        var progressRegex = new System.Text.RegularExpressions.Regex(@"\[download\]\s+(\d+\.?\d*)%");
-
-                        // Handle output line by line as it comes in
-                        string allOutput = "";
-                        string errorBuilder = "";
-                        process2.OutputDataReceived += (sender, e) =>
-                        {
-                            if (!string.IsNullOrEmpty(e.Data))
-                            {
-                                allOutput += e.Data + "\n";
-                                var match = progressRegex.Match(e.Data);
-                                if (match.Success)
-                                {
-                                    var percentage = match.Groups[1].Value;
-                                    // Update UI thread-safe
-                                    dgv_downloads.Invoke(new Action(() =>
-                                    {
-                                        row.Cells["DL"].Value = Math.Round(Convert.ToDecimal(percentage), 0);
-                                        if (Convert.ToDecimal(percentage) == 100) row.Cells["Converted"].Value = "Converting...";
-                                    }));
-                                }
-                            }
-                        };
-
-                        // handle error by line as it comes in
-                        process2.ErrorDataReceived += (sender, e) =>
-                        {
-                            if (!string.IsNullOrEmpty(e.Data))
-                            {
-                                errorBuilder += e.Data + "\n";
-                            }
-                        };
-
-                        // Start reading output
-                        process2.BeginOutputReadLine();
-                        process2.BeginErrorReadLine();
-
-                        // Set initial status
-                        row.Cells["DL"].Value = 1;
-
-                        await process2.WaitForExitAsync();
-
-                        // Final status update (same as your existing code)
-                        if (process2.ExitCode == 0)
-                        {
-                            row.Cells["DL"].Value = "100";
-                            dgv_downloads.Rows[row.Index].DefaultCellStyle.BackColor = Color.Azure;
-                            dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.Black;
-                        }
-                        else
-                        {
-                            dgv_downloads.Rows[row.Index].DefaultCellStyle.BackColor = Color.DarkRed;
-                            dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.White;
-                            WriteError(allOutput + "\n" + errorBuilder);
-                            if (errorBuilder.Contains("cookies"))
-                            {
-                                row.Cells["DL"].Value = "0";
-                                PauseSystem();
-                                MessageBox.Show("YouTube is requiring cookies to confirm your age and/or this not being a bot. Unfortunately, we have to pause downloads.", "YouTube Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                Form frm = new frmCookies();
-                                frm.ShowDialog();
-                            }
-                            if (errorBuilder.Contains("unavailable"))
-                            {
-                                row.Cells["DL"].Value = "100";
-                                PauseSystem();
-                                MessageBox.Show("YouTube is showing this song as unavailable for download. We'll have to skip for now.", "YouTube Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                Form frm = new frmCookies();
-                                frm.ShowDialog();
-                            }
-                        }
-
-                        //var youTube = YouTube.Default; // starting point for YouTube actions
-                        //var video = youTube.GetVideo(link); // gets a Video object with info about the video
-                        //fullpath += video.FileExtension;
-                        //File.WriteAllBytes(fullpath, video.GetBytes());
+                            row.Cells["DL"].Value = Math.Round(percentage * 100, 0);
+                        });
 
                         // actual stream
                         //var stream = await youtube.Videos.Streams.GetAsync(streamInfo);
@@ -335,7 +229,7 @@ namespace YTPD
                         WriteError(ex.ToString());
                         row.Cells["DL"].Value = "100";
                         dgv_downloads.Rows[row.Index].DefaultCellStyle.BackColor = Color.DarkRed;
-                        dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.White;
+                        dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.White
 
                     }
                     //finally
@@ -370,7 +264,6 @@ namespace YTPD
             int RetryCount = 0;
             int MaxRetries = 60;
 
-            // this will force the conversion to give up after 60 seconds of trying
             while (RetryCount < MaxRetries)
             {
                 try
@@ -845,7 +738,7 @@ namespace YTPD
                 }
             }
 
-            lbl_status.Text = "Not Started: " + NotStarted.ToString() + "  ¤  Downloaded: " + Downloaded.ToString() + "  ¤  Failed: " + Failed.ToString() + "  ¤  Completed: " + Completed.ToString();
+            lbl_status.Text = "Not Started: " + NotStarted.ToString() + "  Â¤  Downloaded: " + Downloaded.ToString() + "  Â¤  Failed: " + Failed.ToString() + "  Â¤  Completed: " + Completed.ToString();
         }
 
         private void saveTableToolStripMenuItem_Click(object sender, EventArgs e)
@@ -867,243 +760,6 @@ namespace YTPD
 
         private void button3_Click_1(object sender, EventArgs e)
         {
-
-        }
-
-        private void button3_Click_2(object sender, EventArgs e)
-        {
-            Form frm = new frmArtist(txt_URL.Text);
-            frm.Show();
-            btn_GetArtist.Enabled = false;
-
-            while (frm.Visible == true)
-            {
-                Application.DoEvents();
-            }
-
-            // I'm storing the list of albums in settings because I'm an idiot with cross-form functionality
-            string album = Properties.Settings.Default.AlbumData;
-            Int16 albumcount = 0;
-
-            // if the user quit the form or there's nothing to process...
-            if (album == "END" || album.Length == 0)
-            {
-                btn_GetArtist.Enabled = true;
-                return;
-            }
-
-            // if only one album
-            if (!album.Contains(";"))
-            {
-                GetAlbumInfo2Async(album);
-                albumcount++;
-            }
-            else // multiple albums
-            {
-                string[] albums = album.Split(';');
-                foreach (string s in albums)
-                {
-                    // this is loading the pulled album from YouTube, which is not the same as the playlist
-                    // WebView21 will find the redirect page and get the actual playlist URL
-                    webView21.Source = new Uri(s);
-
-                    while (albumURL.Length == 0)
-                    {
-                        // wait for the webview to load the redirect page
-                        Application.DoEvents();
-                    }
-
-                    // we found it! Time to process it
-                    GetAlbumInfo2Async(albumURL);
-                    albumURL = "";
-                    albumcount++;
-                }
-            }
-
-            txt_URL.Text = "";
-            MessageBox.Show("Completed processing " + albumcount.ToString() + " albums.", "Bulk Album Additions", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            btn_GetArtist.Enabled = true;
-        }
-
-        private void webView21_NavigationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
-        {
-            // this is the final URL after all redirects
-            albumURL = webView21.Source.ToString();
-        }
-
-        private async Task GetAlbumInfo2Async(string url)
-        {
-            // connect to the internets
-            using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("User-Agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0");
-
-            // Explicitly handle encoding
-            var response = await client.GetAsync(url);
-            var bytes = await response.Content.ReadAsByteArrayAsync();
-            var html = Encoding.UTF8.GetString(bytes);
-
-            // get the songs from the HTML
-            var songs = YouTubeMusicExtractor.ExtractSongs(html);
-
-            // add each song to the datagridview
-            foreach (var s in songs)
-            {
-                dgv_downloads.Rows.Add(HttpUtility.HtmlDecode(s.Artist), HttpUtility.HtmlDecode(s.Album), s.Number, HttpUtility.HtmlDecode(s.Name), s.Duration, s.Url, "0", "0", "No");
-            }
-
-            txt_URL.Clear();
-        }
-
-        private void button1_Click_1(object sender, EventArgs e)
-        {
-            using (var fileBrowserDialog = new OpenFileDialog())
-            {
-                // Set the initial folder if needed
-                // folderBrowserDialog.SelectedPath = "C:\\";
-
-                // Set the title of the dialog
-                fileBrowserDialog.Title = "Select a cookie file";
-                fileBrowserDialog.Filter = "Text Files (*.txt)|*.txt";
-                fileBrowserDialog.InitialDirectory = Application.StartupPath;
-
-                // Show the dialog and get the result
-                DialogResult result = fileBrowserDialog.ShowDialog();
-
-                // Check if the user clicked OK
-                if (result == DialogResult.OK)
-                {
-                    // Get the selected folder path
-                    string selectedFile = fileBrowserDialog.SafeFileName;
-                    txt_Cookies.Text = selectedFile;
-                    Properties.Settings.Default.CookieFile = selectedFile;
-                    Properties.Settings.Default.Save();
-                }
-                else
-                {
-                    // Handle the case where the user canceled the dialog
-                    Console.WriteLine("File selection canceled by the user.");
-                }
-            }
-        }
-
-        private void chk_Cookies_CheckedChanged(object sender, EventArgs e)
-        {
-            Properties.Settings.Default.UseCookies = chk_Cookies.Checked;
-            Properties.Settings.Default.Save();
-        }
-
-        private void lbl_CookieHelp_Click(object sender, EventArgs e)
-        {
-            Form frm = new frmCookies();
-            frm.Show();
-        }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("Enter the full URL copied from your favorite browser of either the album or artist page you wish to download. Then, use the related button to pull all songs from an album or select multiple albums from the artist.", "YouTube Album Downloader", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        private void correctArtistToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (dgv_downloads.SelectedRows.Count == 0) return;
-
-            int rowIndex = dgv_downloads.CurrentCell?.RowIndex ?? -1;
-
-            // get the selected band name
-            string bandname = dgv_downloads.Rows[rowIndex].Cells[0].Value.ToString();
-
-            // correct the band name
-            string userInput = Interaction.InputBox("If the band name is incorrect, this is your chance to update it:", "YTAD", bandname);
-
-            // if null then ignore
-            if (userInput != null && userInput.Length > 1)
-            {
-                // update band name for each row with the wrong band name
-                foreach (DataGridViewRow row in dgv_downloads.Rows)
-                {
-                    // no null cells!
-                    if (row.Cells[0].Value != null && row.Cells[0].Value.ToString().Length > 1)
-                    {
-                        // if the band name is the same as the one that needs correcting then correct it
-                        if (row.Cells[0].Value.ToString() == bandname)
-                        {
-                            row.Cells[0].Value = userInput;
-                        }
-                    }
-                }
-
-                // refresh table
-                dgv_downloads.Refresh();
-
-                // save
-                SaveDataGridViewToCSV();
-            }
-        }
-
-        private void dgv_downloads_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            int rowIndex = dgv_downloads.CurrentCell?.RowIndex ?? -1;
-            dgv_downloads.Rows[rowIndex].Selected = true;
-        }
-
-        private void correctAlbumToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (dgv_downloads.SelectedRows.Count == 0) return;
-
-            int rowIndex = dgv_downloads.CurrentCell?.RowIndex ?? -1;
-
-            // get the selected band name
-            string albumname = dgv_downloads.Rows[rowIndex].Cells["Album"].Value.ToString();
-
-            // correct the band name
-            string userInput = Interaction.InputBox("If the album name is incorrect, this is your chance to update it:", "YTAD", albumname);
-
-            // if null then ignore
-            if (userInput != null && userInput.Length > 1)
-            {
-                // update band name for each row with the wrong band name
-                foreach (DataGridViewRow row in dgv_downloads.Rows)
-                {
-                    // no null cells!
-                    if (row.Cells["Album"].Value != null && row.Cells["Album"].Value.ToString().Length > 1)
-                    {
-                        // if the album name is the same as the one that needs correcting then correct it
-                        if (row.Cells["Album"].Value.ToString() == albumname)
-                        {
-                            row.Cells["Album"].Value = userInput;
-                        }
-                    }
-                }
-
-                // refresh table
-                dgv_downloads.Refresh();
-
-                // save
-                SaveDataGridViewToCSV();
-            }
-        }
-
-        private void correctSongToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (dgv_downloads.SelectedRows.Count == 0) return;
-
-            int rowIndex = dgv_downloads.CurrentCell?.RowIndex ?? -1;
-
-            // get the selected band name
-            string songname = dgv_downloads.Rows[rowIndex].Cells["Song"].Value.ToString();
-
-            // correct the band name
-            string userInput = Interaction.InputBox("If the song name is incorrect, this is your chance to update it:", "YTAD", songname);
-
-            // if null then ignore
-            if (userInput != null && userInput.Length > 1)
-            {
-                // update song name
-                dgv_downloads.Rows[rowIndex].Cells["Song"].Value = userInput;
-
-                // refresh table
-                dgv_downloads.Refresh();
 
                 // save
                 SaveDataGridViewToCSV();

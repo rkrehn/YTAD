@@ -51,6 +51,8 @@ namespace YTPD.Properties
                 lblArtist.Text = album.ArtistName;
                 dataDisco.Rows.Add(1, album.AlbumName, album.PlaylistUrl);
             }
+
+            dataDisco.Sort(dataDisco.Columns[1], ListSortDirection.Ascending);  
         }
 
         private void btn_Process_Click(object sender, EventArgs e)

@@ -9,6 +9,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
 using System.Windows.Forms;
 using TagLib;
 using YTPD.Properties;
@@ -219,12 +220,12 @@ namespace YTPD
                                 return;
                             }
                             // use cookies
-                            strargument = $"-o \"{fullpath}\" -i --extract-audio --audio-format mp3 --cookies {txt_Cookies.Text} \"{link}\"";
+                            strargument = $"-o \"{fullpath}\" -i -t mp3 --cookies {txt_Cookies.Text} \"{link}\"";
                         }
                         else
                         {
                             // no cookies
-                            strargument = $"-o \"{fullpath}\" -i --extract-audio --audio-format mp3 \"{link}\"";
+                            strargument = $"-o \"{fullpath}\" -i -t mp3 \"{link}\"";
                         }
 
                         // setup process info
@@ -948,7 +949,7 @@ namespace YTPD
             // add each song to the datagridview
             foreach (var s in songs)
             {
-                dgv_downloads.Rows.Add(s.Artist, s.Album, s.Number, s.Name, s.Duration, s.Url, "0", "0", "No");
+                dgv_downloads.Rows.Add(HttpUtility.HtmlDecode(s.Artist), HttpUtility.HtmlDecode(s.Album), s.Number, HttpUtility.HtmlDecode(s.Name), s.Duration, s.Url, "0", "0", "No");
             }
 
             txt_URL.Clear();

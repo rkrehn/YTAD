@@ -57,9 +57,11 @@
             menu_cleardata = new ToolStripMenuItem();
             openDataFileToolStripMenuItem = new ToolStripMenuItem();
             saveTableToolStripMenuItem = new ToolStripMenuItem();
+            toolStripSeparator1 = new ToolStripSeparator();
             correctArtistToolStripMenuItem = new ToolStripMenuItem();
             correctAlbumToolStripMenuItem = new ToolStripMenuItem();
             correctSongToolStripMenuItem = new ToolStripMenuItem();
+            toolStripSeparator2 = new ToolStripSeparator();
             RestartBadItems = new ToolStripMenuItem();
             lbl_status = new Label();
             timer_count = new System.Windows.Forms.Timer(components);
@@ -71,8 +73,6 @@
             chk_Cookies = new CheckBox();
             lbl_CookieHelp = new Label();
             lbl_YTURLHelp = new Label();
-            toolStripSeparator1 = new ToolStripSeparator();
-            toolStripSeparator2 = new ToolStripSeparator();
             ((System.ComponentModel.ISupportInitialize)dgv_downloads).BeginInit();
             contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webView21).BeginInit();
@@ -288,6 +288,11 @@
             saveTableToolStripMenuItem.Text = "Save Table";
             saveTableToolStripMenuItem.Click += saveTableToolStripMenuItem_Click;
             // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new Size(209, 6);
+            // 
             // correctArtistToolStripMenuItem
             // 
             correctArtistToolStripMenuItem.Name = "correctArtistToolStripMenuItem";
@@ -308,6 +313,11 @@
             correctSongToolStripMenuItem.Size = new Size(212, 22);
             correctSongToolStripMenuItem.Text = "Correct Song";
             correctSongToolStripMenuItem.Click += correctSongToolStripMenuItem_Click;
+            // 
+            // toolStripSeparator2
+            // 
+            toolStripSeparator2.Name = "toolStripSeparator2";
+            toolStripSeparator2.Size = new Size(209, 6);
             // 
             // RestartBadItems
             // 
@@ -422,16 +432,6 @@
             lbl_YTURLHelp.Text = "?";
             lbl_YTURLHelp.Click += label4_Click;
             // 
-            // toolStripSeparator1
-            // 
-            toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(209, 6);
-            // 
-            // toolStripSeparator2
-            // 
-            toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new Size(209, 6);
-            // 
             // Form1
             // 
             AcceptButton = btn_GetAlbum;
@@ -462,7 +462,7 @@
             Margin = new Padding(3, 2, 3, 2);
             MaximizeBox = false;
             Name = "Form1";
-            Text = "YouTube Album Downloader v2.0";
+            Text = "YouTube Album Downloader v2.1";
             FormClosing += Form1_FormClosing;
             Load += Form1_Load;
             ((System.ComponentModel.ISupportInitialize)dgv_downloads).EndInit();

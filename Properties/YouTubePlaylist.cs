@@ -83,6 +83,9 @@ public class YouTubeMusicExtractor
                     videoId = match.Groups[2].Value;
                 }
 
+                // fix any encoded characters in the song name
+                songName = DecodeText(songName);
+
                 // Skip if we've already processed this video ID
                 if (processedVideoIds.Contains(videoId))
                     continue;
@@ -115,6 +118,20 @@ public class YouTubeMusicExtractor
         return songs.Take(20).ToList(); // Reasonable limit for an album
     }
 
+    public static string DecodeText(string input)
+    {
+        if (string.IsNullOrEmpty(input))
+            return input;
+
+        // First decode HTML entities
+        string decoded = System.Web.HttpUtility.HtmlDecode(input);
+
+        // Then decode Unicode escape sequences
+        decoded = System.Text.RegularExpressions.Regex.Unescape(decoded);
+
+        return decoded;
+    }
+
     private static AlbumInfo ExtractAlbumInfo(string htmlContent)
     {
         // Pattern to match: <title>De Profundis - Album by VADER</title>
@@ -125,8 +142,8 @@ public class YouTubeMusicExtractor
         {
             return new AlbumInfo
             {
-                Album = match.Groups[1].Value.Trim(),
-                Artist = match.Groups[2].Value.Trim()
+                Album = DecodeText(match.Groups[1].Value.Trim()),
+                Artist = DecodeText(match.Groups[2].Value.Trim())
             };
         }
 
@@ -141,8 +158,8 @@ public class YouTubeMusicExtractor
             {
                 return new AlbumInfo
                 {
-                    Album = parts[0].Trim(),
-                    Artist = parts[1].Trim()
+                    Album = DecodeText(parts[0].Trim()),
+                    Artist = DecodeText(parts[1].Trim())
                 };
             }
         }

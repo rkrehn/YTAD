@@ -169,7 +169,7 @@ namespace YTPD.Properties
             var metaTitleMatch = Regex.Match(html, @"<meta property=""og:title"" content=""([^""]+)""");
             if (metaTitleMatch.Success)
             {
-                return metaTitleMatch.Groups[1].Value;
+                return  metaTitleMatch.Groups[1].Value;
             }
 
             // Method 2: From page title

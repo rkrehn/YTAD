@@ -16,6 +16,9 @@ Simply copy and paste the playlist link or album link from YouTube Music into YT
 ![Screenshot](2025-09-16_11-13.png)
 
 ## Tutorial
+
+View a video tutorial on my website: [https://krehnsolutions.com/ytadtutorial.php](https://krehnsolutions.com/ytadtutorial.php)
+
 ### Downloading an artist's discography
 
 1. Open a browser and go to [https://music.youtube.com](https://music.youtube.com)

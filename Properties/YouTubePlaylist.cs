@@ -48,9 +48,9 @@ public class YouTubeMusicExtractor
             // Pattern 4: More flexible pattern for complex structures (updated)
             @"""text"":""([A-Za-z0-9][^""]{0,49})"".*?""videoId"":""([A-Za-z0-9_-]{11})""",
             
-            // Pattern 5: Handle accessibility data structure
-            @"""accessibilityPlayData"":\{""accessibilityData"":\{""label"":""Play ([^""-]+) - ([^""]+)""[^}]*""videoId"":""([A-Za-z0-9_-]{11})""",
-            
+            // Pattern 5: Handle accessibility data structure  
+            @"""accessibilityPlayData"":\{""accessibilityData"":\{""label"":""Play ([^""]+) - ([^""]+)""[^}]*""videoId"":""([A-Za-z0-9_-]{11})""",
+
             // Pattern 6: Additional pattern for runs structure with different ordering
             @"""runs"":\[\{""text"":""([^""]{1,50})""[^}]*\}[^}]*""watchEndpoint"":\{""videoId"":""([A-Za-z0-9_-]{11})""",
             
@@ -58,7 +58,10 @@ public class YouTubeMusicExtractor
             @"""text"":""(\d+|[A-Za-z0-9'&\s\-\(\)\.!?\[\]]{1,50})""[^}]*""navigationEndpoint""[^}]*""videoId"":""([A-Za-z0-9_-]{11})""",
             
             // Pattern 8: Fallback pattern for playNavigationEndpoint structure
-            @"""playNavigationEndpoint"":\{[^}]*""videoId"":""([A-Za-z0-9_-]{11})""[^}]*\}[^}]*""text"":\{""runs"":\[\{""text"":""([^""]{1,50})"""
+            @"""playNavigationEndpoint"":\{[^}]*""videoId"":""([A-Za-z0-9_-]{11})""[^}]*\}[^}]*""text"":\{""runs"":\[\{""text"":""([^""]{1,50})""",
+        
+            // Pattern 9: flexColumns structure - first column only (song title)
+            @"""flexColumns"":\[\{""musicResponsiveListItemFlexColumnRenderer"":\{""text"":\{""runs"":\[\{""text"":""([^""]+)"",""navigationEndpoint"":\{""clickTrackingParams""[^}]+""watchEndpoint"":\{""videoId"":""([A-Za-z0-9_-]{11})""",
         };
 
         var processedSongs = new HashSet<string>(); // Change to track videoId+songName
@@ -123,7 +126,28 @@ public class YouTubeMusicExtractor
                         Artist = artistFromPattern ?? albumInfo?.Artist
                     };
 
-                    songs.Add(song);
+                    // NEW: Try to extract the actual track index from the HTML
+                    var trackIndex = ExtractTrackIndex(decodedContent, videoId);
+                    if (trackIndex.HasValue)
+                    {
+                        song.Number = trackIndex.Value;
+                    }
+
+                    if (IsValidSong(song))
+                    {
+                        songs.Add(song);
+                        // Use composite key for deduplication, but keep videoId for duration mapping
+                        if (!songDataMap.ContainsKey(videoId))
+                        {
+                            songDataMap[videoId] = song;
+                        }
+                        processedSongs.Add(compositeKey);
+                    }
+                    else
+                    {
+                        WriteError($"INVALID SONG DATA: '{songName}' (VideoID: {videoId}) - Missing required fields");
+                    }
+
                     // Use composite key for deduplication, but keep videoId for duration mapping
                     if (!songDataMap.ContainsKey(videoId))
                     {
@@ -151,9 +175,13 @@ public class YouTubeMusicExtractor
         // Assign correct track numbers AFTER sorting
         for (int i = 0; i < songs.Count; i++)
         {
-            songs[i].Number = i + 1;
+            if (songs[i].Number == 0) // If we didn't extract a track number from HTML
+            {
+                songs[i].Number = i + 1; // Fall back to sequential numbering
+            }
         }
 
+        songs = songs.OrderBy(s => s.Number).ToList();
         return songs.Take(20).ToList(); // Reasonable limit for an album
     }
 
@@ -374,7 +402,7 @@ public class YouTubeMusicExtractor
     private static int? ExtractTrackIndex(string decodedContent, string videoId)
     {
         // Pattern to find the index near a specific videoId
-        // Looking for: "videoId":"iR_zm9rJaEk"......"index":{"runs":[{"text":"1"}]}
+        // Looking for: "videoId":"8F2nfvH9glI"......"index":{"runs":[{"text":"6"}]}
         var indexPattern = $@"""videoId"":""{Regex.Escape(videoId)}"".*?""index"":\{{""runs"":\[\{{""text"":""(\d+)""";
         var match = Regex.Match(decodedContent, indexPattern, RegexOptions.Singleline);
 
@@ -396,5 +424,35 @@ public class YouTubeMusicExtractor
         {
             sr.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " - " + msg);
         }
+    }
+
+    // Add this helper method to your class
+    private static bool IsValidSong(Song song)
+    {
+        // Must have a video ID
+        if (string.IsNullOrWhiteSpace(song.VideoId) || song.VideoId.Length != 11)
+            return false;
+
+        // Must have a song name
+        if (string.IsNullOrWhiteSpace(song.Name))
+            return false;
+
+        // Song name must pass the existing validation
+        // (this is redundant since we already checked, but adds safety)
+        if (song.Name.Length < 1)
+            return false;
+
+        // Optional: Require artist (comment out if not needed)
+        if (string.IsNullOrWhiteSpace(song.Artist))
+            return false;
+
+        // Optional: Require album (comment out if not needed)
+        if (string.IsNullOrWhiteSpace(song.Album))
+            return false;
+
+        // Optional: Warn if no duration but don't reject
+        // Duration will be filled in later by ExtractDurations
+
+        return true;
     }
 }

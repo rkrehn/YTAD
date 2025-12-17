@@ -29,9 +29,9 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle6 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle5 = new DataGridViewCellStyle();
             label1 = new Label();
             txt_URL = new TextBox();
             btn_GetAlbum = new Button();
@@ -73,6 +73,7 @@
             chk_Cookies = new CheckBox();
             lbl_CookieHelp = new Label();
             lbl_YTURLHelp = new Label();
+            removeSongToolMenuItem1 = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)dgv_downloads).BeginInit();
             contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webView21).BeginInit();
@@ -111,24 +112,24 @@
             // 
             dgv_downloads.BackgroundColor = Color.Azure;
             dgv_downloads.BorderStyle = BorderStyle.Fixed3D;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = Color.Azure;
-            dataGridViewCellStyle1.Font = new Font("Verdana", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            dataGridViewCellStyle1.ForeColor = Color.Black;
-            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-            dgv_downloads.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = Color.Azure;
+            dataGridViewCellStyle4.Font = new Font("Verdana", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            dataGridViewCellStyle4.ForeColor = Color.Black;
+            dataGridViewCellStyle4.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle4.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle4.WrapMode = DataGridViewTriState.True;
+            dgv_downloads.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle4;
             dgv_downloads.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgv_downloads.Columns.AddRange(new DataGridViewColumn[] { Artist, Album, SongNum, Song, Duration, Link, DL, Tagged, Converted });
-            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = Color.Azure;
-            dataGridViewCellStyle3.Font = new Font("Verdana", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            dataGridViewCellStyle3.ForeColor = Color.Black;
-            dataGridViewCellStyle3.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = DataGridViewTriState.False;
-            dgv_downloads.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle6.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = Color.Azure;
+            dataGridViewCellStyle6.Font = new Font("Verdana", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            dataGridViewCellStyle6.ForeColor = Color.Black;
+            dataGridViewCellStyle6.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle6.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle6.WrapMode = DataGridViewTriState.False;
+            dgv_downloads.DefaultCellStyle = dataGridViewCellStyle6;
             dgv_downloads.Location = new Point(12, 98);
             dgv_downloads.Margin = new Padding(3, 2, 3, 2);
             dgv_downloads.Name = "dgv_downloads";
@@ -140,9 +141,9 @@
             // 
             // Artist
             // 
-            dataGridViewCellStyle2.BackColor = Color.Azure;
-            dataGridViewCellStyle2.ForeColor = Color.Black;
-            Artist.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle5.BackColor = Color.Azure;
+            dataGridViewCellStyle5.ForeColor = Color.Black;
+            Artist.DefaultCellStyle = dataGridViewCellStyle5;
             Artist.HeaderText = "Artist";
             Artist.Name = "Artist";
             Artist.Width = 150;
@@ -263,9 +264,9 @@
             // 
             // contextMenuStrip1
             // 
-            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { menu_cleardata, openDataFileToolStripMenuItem, saveTableToolStripMenuItem, toolStripSeparator1, correctArtistToolStripMenuItem, correctAlbumToolStripMenuItem, correctSongToolStripMenuItem, toolStripSeparator2, RestartBadItems });
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { menu_cleardata, openDataFileToolStripMenuItem, saveTableToolStripMenuItem, toolStripSeparator1, correctArtistToolStripMenuItem, correctAlbumToolStripMenuItem, correctSongToolStripMenuItem, removeSongToolMenuItem1, toolStripSeparator2, RestartBadItems });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(213, 170);
+            contextMenuStrip1.Size = new Size(213, 214);
             // 
             // menu_cleardata
             // 
@@ -432,6 +433,13 @@
             lbl_YTURLHelp.Text = "?";
             lbl_YTURLHelp.Click += label4_Click;
             // 
+            // removeSongToolMenuItem1
+            // 
+            removeSongToolMenuItem1.Name = "removeSongToolMenuItem1";
+            removeSongToolMenuItem1.Size = new Size(212, 22);
+            removeSongToolMenuItem1.Text = "Remove Song";
+            removeSongToolMenuItem1.Click += removeSongToolMenuItem1_Click;
+            // 
             // Form1
             // 
             AcceptButton = btn_GetAlbum;
@@ -462,7 +470,7 @@
             Margin = new Padding(3, 2, 3, 2);
             MaximizeBox = false;
             Name = "Form1";
-            Text = "YouTube Album Downloader v2.4";
+            Text = "YouTube Album Downloader v2.5";
             FormClosing += Form1_FormClosing;
             Load += Form1_Load;
             ((System.ComponentModel.ISupportInitialize)dgv_downloads).EndInit();
@@ -516,5 +524,6 @@
         private DataGridViewTextBoxColumn Converted;
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripSeparator toolStripSeparator2;
+        private ToolStripMenuItem removeSongToolMenuItem1;
     }
 }

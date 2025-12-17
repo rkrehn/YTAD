@@ -165,7 +165,14 @@ namespace YTPD
                     album = row.Cells["Album"].Value.ToString();
                     songnum = row.Cells["SongNum"].Value.ToString();
                     song = row.Cells["Song"].Value.ToString();
-                    duration = row.Cells["Duration"].Value.ToString();
+                    if (row.Cells["Duration"].Value.ToString() == null)
+                    {
+                        duration = "0:00";
+                    }
+                    else
+                    {
+                        duration = row.Cells["Duration"].Value.ToString();
+                    }
                     link = row.Cells["Link"].Value.ToString();
                     link = System.Text.RegularExpressions.Regex.Replace(link, @"&list=[^&]*", "");
 
@@ -213,118 +220,119 @@ namespace YTPD
                         string strargument;
                         if (chk_Cookies.Checked == true)
                         {
-                        // ensure cookie file exists
-                        if (!File.Exists(txt_Cookies.Text))
-                        {
-                            PauseSystem();
-                            MessageBox.Show("Cookie file does not exist! Please select a valid cookie file or uncheck 'Use Cookies'.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
-                        }
-                        // use cookies
-                        strargument = $"-o \"{fullpath}\" -i -t mp3 --cookies {txt_Cookies.Text} \"{link}\"";
-                    }
-                        else
-                    {
-                        // no cookies
-                        strargument = $"-o \"{fullpath}\" -i -t mp3 \"{link}\"";
-                    }
-
-                    // setup process info
-                    var processInfo = new ProcessStartInfo
-                    {
-                        FileName = Path.Combine(Application.StartupPath, "yt-dlp.exe"),
-                        Arguments = strargument,
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        WindowStyle = ProcessWindowStyle.Hidden,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        RedirectStandardInput = false
-                    };
-
-                    using var process2 = Process.Start(processInfo);
-
-                    // Simple regex to catch download percentage
-                    var progressRegex = new System.Text.RegularExpressions.Regex(@"\[download\]\s+(\d+\.?\d*)%");
-
-                    // Handle output line by line as it comes in
-                    string allOutput = "";
-                    string errorBuilder = "";
-                    process2.OutputDataReceived += (sender, e) =>
-                    {
-                        if (!string.IsNullOrEmpty(e.Data))
-                        {
-                            allOutput += e.Data + "\n";
-                            var match = progressRegex.Match(e.Data);
-                            if (match.Success)
+                            // ensure cookie file exists
+                            if (!File.Exists(txt_Cookies.Text))
                             {
-                                var percentage = match.Groups[1].Value;
-                                // Update UI thread-safe
-                                dgv_downloads.Invoke(new Action(() =>
-                                {
-                                    row.Cells["DL"].Value = Math.Round(Convert.ToDecimal(percentage), 0);
-                                    if (Convert.ToDecimal(percentage) == 100) row.Cells["Converted"].Value = "Converting...";
-                                }));
+                                PauseSystem();
+                                MessageBox.Show("Cookie file does not exist! Please select a valid cookie file or uncheck 'Use Cookies'.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return;
                             }
+                            // use cookies
+                            strargument = $"-o \"{fullpath}\" -i -t mp3 --cookies {txt_Cookies.Text} \"{link}\"";
                         }
-                    };
-
-                    // handle error by line as it comes in
-                    process2.ErrorDataReceived += (sender, e) =>
-                    {
-                        if (!string.IsNullOrEmpty(e.Data))
+                        else
                         {
-                            errorBuilder += e.Data + "\n";
+                            // no cookies
+                            strargument = $"-o \"{fullpath}\" -i -t mp3 \"{link}\"";
                         }
-                    };
 
-                    // Start reading output
-                    process2.BeginOutputReadLine();
-                    process2.BeginErrorReadLine();
-
-                    // Set initial status
-                    row.Cells["DL"].Value = 1;
-
-                    await process2.WaitForExitAsync();
-
-                    // Final status update (same as your existing code)
-                    if (process2.ExitCode == 0)
-                    {
-                        row.Cells["DL"].Value = "100";
-                        dgv_downloads.Rows[row.Index].DefaultCellStyle.BackColor = Color.Azure;
-                        dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.Black;
-                    }
-                    else
-                    {
-                        dgv_downloads.Rows[row.Index].DefaultCellStyle.BackColor = Color.DarkRed;
-                        dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.White;
-                        WriteError(allOutput + "\n" + errorBuilder);
-                        if (errorBuilder.Contains("cookies"))
+                        // setup process info
+                        var processInfo = new ProcessStartInfo
                         {
-                            row.Cells["DL"].Value = "0";
-                            PauseSystem();
-                            MessageBox.Show("YouTube is requiring updated cookies to confirm your age and/or this not being a bot. Unfortunately, we have to pause downloads. Please visit youtube.com and save cookies again.", "YouTube Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                        if (errorBuilder.Contains("unavailable"))
+                            FileName = Path.Combine(Application.StartupPath, "yt-dlp.exe"),
+                            Arguments = strargument,
+                            UseShellExecute = false,
+                            CreateNoWindow = true,
+                            WindowStyle = ProcessWindowStyle.Hidden,
+                            RedirectStandardOutput = true,
+                            RedirectStandardError = true,
+                            RedirectStandardInput = false
+                        };
+
+                        using var process2 = Process.Start(processInfo);
+
+                        // Simple regex to catch download percentage
+                        var progressRegex = new System.Text.RegularExpressions.Regex(@"\[download\]\s+(\d+\.?\d*)%");
+
+                        // Handle output line by line as it comes in
+                        string allOutput = "";
+                        string errorBuilder = "";
+                        process2.OutputDataReceived += (sender, e) =>
+                        {
+                            if (!string.IsNullOrEmpty(e.Data))
+                            {
+                                allOutput += e.Data + "\n";
+                                var match = progressRegex.Match(e.Data);
+                                if (match.Success)
+                                {
+                                    var percentage = match.Groups[1].Value;
+                                    // Update UI thread-safe
+                                    dgv_downloads.Invoke(new Action(() =>
+                                    {
+                                        row.Cells["DL"].Value = Math.Round(Convert.ToDecimal(percentage), 0);
+                                        if (Convert.ToDecimal(percentage) == 100) row.Cells["Converted"].Value = "Converting...";
+                                    }));
+                                }
+                            }
+                        };
+
+                        // handle error by line as it comes in
+                        process2.ErrorDataReceived += (sender, e) =>
+                        {
+                            if (!string.IsNullOrEmpty(e.Data))
+                            {
+                                errorBuilder += e.Data + "\n";
+                            }
+                        };
+
+                        // Start reading output
+                        process2.BeginOutputReadLine();
+                        process2.BeginErrorReadLine();
+
+                        // Set initial status
+                        row.Cells["DL"].Value = 1;
+
+                        await process2.WaitForExitAsync();
+
+                        // Final status update (same as your existing code)
+                        if (process2.ExitCode == 0)
                         {
                             row.Cells["DL"].Value = "100";
-                            PauseSystem();
-                            MessageBox.Show("YouTube is showing this song as unavailable for download. We'll have to skip for now.", "YouTube Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            dgv_downloads.Rows[row.Index].DefaultCellStyle.BackColor = Color.Azure;
+                            dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.Black;
+                            row.Cells["Converted"].Value = "Yes";
                         }
-                    }
+                        else
+                        {
+                            dgv_downloads.Rows[row.Index].DefaultCellStyle.BackColor = Color.DarkRed;
+                            dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.White;
+                            WriteError(allOutput + "\n" + errorBuilder);
+                            if (errorBuilder.Contains("cookies"))
+                            {
+                                row.Cells["DL"].Value = "0";
+                                PauseSystem();
+                                MessageBox.Show("YouTube is requiring updated cookies to confirm your age and/or this not being a bot. Unfortunately, we have to pause downloads. Please visit youtube.com and save cookies again.", "YouTube Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                            if (errorBuilder.Contains("unavailable"))
+                            {
+                                row.Cells["DL"].Value = "100";
+                                PauseSystem();
+                                MessageBox.Show("YouTube is showing this song as unavailable for download. We'll have to skip for now.", "YouTube Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
 
-                    //var youTube = YouTube.Default; // starting point for YouTube actions
-                    //var video = youTube.GetVideo(link); // gets a Video object with info about the video
-                    //fullpath += video.FileExtension;
-                    //File.WriteAllBytes(fullpath, video.GetBytes());
+                        //var youTube = YouTube.Default; // starting point for YouTube actions
+                        //var video = youTube.GetVideo(link); // gets a Video object with info about the video
+                        //fullpath += video.FileExtension;
+                        //File.WriteAllBytes(fullpath, video.GetBytes());
 
-                    // actual stream
-                    //var stream = await youtube.Videos.Streams.GetAsync(streamInfo);
-                    //await youtube.Videos.Streams.DownloadAsync(streamInfo, fullpath, progress);
+                        // actual stream
+                        //var stream = await youtube.Videos.Streams.GetAsync(streamInfo);
+                        //await youtube.Videos.Streams.DownloadAsync(streamInfo, fullpath, progress);
 
-                    // set colors
-                    dgv_downloads.Rows[row.Index].DefaultCellStyle.BackColor = Color.Azure;
-                        dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.Black;
+                        // set colors
+                        //dgv_downloads.Rows[row.Index].DefaultCellStyle.BackColor = Color.Azure;
+                        //dgv_downloads.Rows[row.Index].DefaultCellStyle.ForeColor = Color.Black;
                     }
                     catch (Exception ex)
                     {
@@ -1108,6 +1116,22 @@ namespace YTPD
                 // save
                 SaveDataGridViewToCSV();
             }
+        }
+
+        private void removeSongToolMenuItem1_Click(object sender, EventArgs e)
+        {
+            if (dgv_downloads.SelectedRows.Count == 0) return;
+
+            int rowIndex = dgv_downloads.CurrentCell?.RowIndex ?? -1;
+
+            // remove the selected row
+            dgv_downloads.Rows.RemoveAt(rowIndex);
+
+            // refresh table
+            dgv_downloads.Refresh();
+
+            // save
+            SaveDataGridViewToCSV();
         }
     }
 }

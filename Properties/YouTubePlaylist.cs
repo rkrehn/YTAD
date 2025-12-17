@@ -60,7 +60,7 @@ public class YouTubeMusicExtractor
             // Pattern 8: Fallback pattern for playNavigationEndpoint structure
             @"""playNavigationEndpoint"":\{[^}]*""videoId"":""([A-Za-z0-9_-]{11})""[^}]*\}[^}]*""text"":\{""runs"":\[\{""text"":""([^""]{1,50})""",
         
-            // Pattern 9: flexColumns structure - first column only (song title)
+            // Pattern 9: flexColumns structure - must have navigationEndpoint immediately after text
             @"""flexColumns"":\[\{""musicResponsiveListItemFlexColumnRenderer"":\{""text"":\{""runs"":\[\{""text"":""([^""]+)"",""navigationEndpoint"":\{""clickTrackingParams""[^}]+""watchEndpoint"":\{""videoId"":""([A-Za-z0-9_-]{11})""",
         };
 
@@ -106,7 +106,7 @@ public class YouTubeMusicExtractor
                 // Fix any encoded characters in the song name
                 songName = DecodeText(songName);
 
-                // NEW: Clean up leading/trailing special characters (pipes, spaces, etc.)
+                // Clean up leading/trailing special characters (pipes, spaces, etc.)
                 songName = songName.Trim().TrimStart('|', ' ', '-', '/', '\\').TrimEnd('|', ' ', '-', '/', '\\').Trim();
                 string compositeKey = $"{videoId}|{songName}";
 
@@ -126,13 +126,14 @@ public class YouTubeMusicExtractor
                         Artist = artistFromPattern ?? albumInfo?.Artist
                     };
 
-                    // NEW: Try to extract the actual track index from the HTML
+                    // Try to extract the actual track index from the HTML
                     var trackIndex = ExtractTrackIndex(decodedContent, videoId);
                     if (trackIndex.HasValue)
                     {
                         song.Number = trackIndex.Value;
                     }
 
+                    // Validate the song has required data before adding
                     if (IsValidSong(song))
                     {
                         songs.Add(song);
@@ -145,24 +146,14 @@ public class YouTubeMusicExtractor
                     }
                     else
                     {
-                        WriteError($"INVALID SONG DATA: '{songName}' (VideoID: {videoId}) - Missing required fields");
+                        WriteError($"INVALID SONG DATA: '{songName}' (VideoID: {videoId}) - Failed validation");
                     }
-
-                    // Use composite key for deduplication, but keep videoId for duration mapping
-                    if (!songDataMap.ContainsKey(videoId))
-                    {
-                        songDataMap[videoId] = song;
-                    }
-                    processedSongs.Add(compositeKey);
                 }
                 else
                 {
                     // DEBUG: Log rejected songs
                     WriteError($"REJECTED: '{songName}' (VideoID: {videoId})");
                 }
-
-                // REMOVED: Early termination logic that was causing issues
-                // This allows all patterns to be tried and all songs to be found
             }
         }
 
@@ -173,6 +164,7 @@ public class YouTubeMusicExtractor
         ExtractDurations(decodedContent, songDataMap);
 
         // Assign correct track numbers AFTER sorting
+        // Only assign sequential numbers if the song doesn't already have a track number from the HTML
         for (int i = 0; i < songs.Count; i++)
         {
             if (songs[i].Number == 0) // If we didn't extract a track number from HTML
@@ -181,11 +173,13 @@ public class YouTubeMusicExtractor
             }
         }
 
+        // Sort by track number to ensure proper order
         songs = songs.OrderBy(s => s.Number).ToList();
+
         return songs.Take(20).ToList(); // Reasonable limit for an album
     }
 
-    // NEW: Helper method to sort songs by their appearance order in the original content
+    // Helper method to sort songs by their appearance order in the original content
     private static List<Song> SortSongsByOriginalOrder(List<Song> songs, string content)
     {
         var songsWithPositions = new List<(Song song, int position)>();
@@ -208,7 +202,6 @@ public class YouTubeMusicExtractor
             .Select(x => x.song)
             .ToList();
     }
-
 
     public static string DecodeText(string input)
     {
@@ -282,8 +275,6 @@ public class YouTubeMusicExtractor
             }
         }
 
-
-
         // For songs without duration from contextual matching, try to match by position
         if (matches.Count > 0 && songDataMap.Values.Any(s => string.IsNullOrEmpty(s.Duration)))
         {
@@ -334,7 +325,6 @@ public class YouTubeMusicExtractor
                      .Replace("\\x2e", ".");
     }
 
-    // UPDATED: More lenient validation for numeric tracks like "111"
     private static bool IsValidSongName(string name, string[] excludeWords)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -380,6 +370,7 @@ public class YouTubeMusicExtractor
 
         // Check for specific UI patterns (be precise, not broad)
         if (name.Contains("K plays") || // "20K plays", "39K plays"
+            name.Contains("M plays") || // "1.2M plays"
             name.Contains("thousand plays") ||
             name.Contains("million plays") ||
             name.Contains("Song will play next") ||
@@ -414,45 +405,43 @@ public class YouTubeMusicExtractor
         return null;
     }
 
-    // CHANGE WriteError to static so it can be called from static context
+    private static bool IsValidSong(Song song)
+    {
+        // Must have a video ID
+        if (string.IsNullOrWhiteSpace(song.VideoId) || song.VideoId.Length != 11)
+        {
+            WriteError($"IsValidSong FAILED: Invalid VideoID '{song.VideoId}'");
+            return false;
+        }
+
+        // Must have a song name
+        if (string.IsNullOrWhiteSpace(song.Name))
+        {
+            WriteError($"IsValidSong FAILED: Empty song name for VideoID '{song.VideoId}'");
+            return false;
+        }
+
+        // Song name must be at least 2 characters (except for special numeric cases handled elsewhere)
+        if (song.Name.Length < 2)
+        {
+            WriteError($"IsValidSong FAILED: Song name too short '{song.Name}' for VideoID '{song.VideoId}'");
+            return false;
+        }
+
+        // Don't require artist/album - they're nice to have but not critical
+        // Artist and Album are often populated from the page title, not per-song data
+
+        return true;
+    }
+
     private static void WriteError(string msg)
     {
         string strFile = Application.StartupPath + "\\error.log";
-        if (!System.IO.File.Exists(strFile)) System.IO.File.Create(strFile);
+        if (!System.IO.File.Exists(strFile)) System.IO.File.Create(strFile).Close();
 
         using (var sr = new StreamWriter(strFile, true, Encoding.UTF8))
         {
             sr.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " - " + msg);
         }
-    }
-
-    // Add this helper method to your class
-    private static bool IsValidSong(Song song)
-    {
-        // Must have a video ID
-        if (string.IsNullOrWhiteSpace(song.VideoId) || song.VideoId.Length != 11)
-            return false;
-
-        // Must have a song name
-        if (string.IsNullOrWhiteSpace(song.Name))
-            return false;
-
-        // Song name must pass the existing validation
-        // (this is redundant since we already checked, but adds safety)
-        if (song.Name.Length < 1)
-            return false;
-
-        // Optional: Require artist (comment out if not needed)
-        if (string.IsNullOrWhiteSpace(song.Artist))
-            return false;
-
-        // Optional: Require album (comment out if not needed)
-        if (string.IsNullOrWhiteSpace(song.Album))
-            return false;
-
-        // Optional: Warn if no duration but don't reject
-        // Duration will be filled in later by ExtractDurations
-
-        return true;
     }
 }

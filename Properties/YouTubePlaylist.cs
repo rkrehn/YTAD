@@ -64,12 +64,12 @@ public class YouTubeMusicExtractor
             @"""flexColumns"":\[\{""musicResponsiveListItemFlexColumnRenderer"":\{""text"":\{""runs"":\[\{""text"":""([^""]+)"",""navigationEndpoint"":\{""clickTrackingParams""[^}]+""watchEndpoint"":\{""videoId"":""([A-Za-z0-9_-]{11})""",
         };
 
-        var processedSongs = new HashSet<string>(); // Change to track videoId+songName
+        var processedVideoIds = new HashSet<string>(); // Track videoIds we've seen
         var excludeWords = new[] { "plays", "minutes", "seconds", "Sign in", "Save", "Play", "Add",
-                          "Share", "Go to", "Start", "Remove", "Improve", "Make", "Like",
-                          "Dislike", "Not a fan", "Action menu", "songs", "Album", "Artist",
-                          "View song", "thousand", "million", "Home", "Explore", "Library",
-                          "will play", "added to", "Song will", "Song added", "Track moved" };
+                  "Share", "Go to", "Start", "Remove", "Improve", "Make", "Like",
+                  "Dislike", "Not a fan", "Action menu", "songs", "Album", "Artist",
+                  "View song", "thousand", "million", "Home", "Explore", "Library",
+                  "will play", "added to", "Song will", "Song added", "Track moved" };
 
         // Dictionary to store song data temporarily for duration matching
         var songDataMap = new Dictionary<string, Song>();
@@ -108,41 +108,56 @@ public class YouTubeMusicExtractor
 
                 // Clean up leading/trailing special characters (pipes, spaces, etc.)
                 songName = songName.Trim().TrimStart('|', ' ', '-', '/', '\\').TrimEnd('|', ' ', '-', '/', '\\').Trim();
-                string compositeKey = $"{videoId}|{songName}";
 
-                // Skip if we've already processed this exact song
-                if (processedSongs.Contains(compositeKey))
-                    continue;
+                // Try to extract the track index from HTML for this videoId
+                var trackIndex = ExtractTrackIndex(decodedContent, videoId);
+
+                // If we've already processed this videoId
+                if (processedVideoIds.Contains(videoId))
+                {
+                    // Check if we should UPDATE the existing song with better data
+                    if (songDataMap.ContainsKey(videoId) && IsValidSongName(songName, excludeWords))
+                    {
+                        var existingSong = songDataMap[videoId];
+
+                        // Prefer longer, more complete song names
+                        if (songName.Length > existingSong.Name.Length)
+                        {
+                            existingSong.Name = songName;
+                            if (!string.IsNullOrEmpty(artistFromPattern))
+                            {
+                                existingSong.Artist = artistFromPattern;
+                            }
+                            WriteError($"UPDATED: VideoID {videoId} with better name: '{songName}'");
+                        }
+
+                        // Update track number if we found one and didn't have one before
+                        if (trackIndex.HasValue && existingSong.Number == 0)
+                        {
+                            existingSong.Number = trackIndex.Value;
+                        }
+                    }
+                    continue; // Skip adding duplicate
+                }
 
                 // Validate the song name
                 if (IsValidSongName(songName, excludeWords))
                 {
                     var song = new Song
                     {
-                        Number = 0, // Will be set properly later
+                        Number = trackIndex ?? 0, // Use extracted track number or 0
                         Name = songName,
                         VideoId = videoId,
                         Album = albumInfo?.Album,
                         Artist = artistFromPattern ?? albumInfo?.Artist
                     };
 
-                    // Try to extract the actual track index from the HTML
-                    var trackIndex = ExtractTrackIndex(decodedContent, videoId);
-                    if (trackIndex.HasValue)
-                    {
-                        song.Number = trackIndex.Value;
-                    }
-
                     // Validate the song has required data before adding
                     if (IsValidSong(song))
                     {
                         songs.Add(song);
-                        // Use composite key for deduplication, but keep videoId for duration mapping
-                        if (!songDataMap.ContainsKey(videoId))
-                        {
-                            songDataMap[videoId] = song;
-                        }
-                        processedSongs.Add(compositeKey);
+                        songDataMap[videoId] = song;
+                        processedVideoIds.Add(videoId);
                     }
                     else
                     {
@@ -165,12 +180,19 @@ public class YouTubeMusicExtractor
 
         // Assign correct track numbers AFTER sorting
         // Only assign sequential numbers if the song doesn't already have a track number from the HTML
+        int sequentialNumber = 1;
         for (int i = 0; i < songs.Count; i++)
         {
             if (songs[i].Number == 0) // If we didn't extract a track number from HTML
             {
-                songs[i].Number = i + 1; // Fall back to sequential numbering
+                songs[i].Number = sequentialNumber;
             }
+            else
+            {
+                // Use the extracted track number
+                sequentialNumber = songs[i].Number;
+            }
+            sequentialNumber++; // Increment for next song
         }
 
         // Sort by track number to ensure proper order

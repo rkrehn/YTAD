@@ -198,7 +198,7 @@ public class YouTubeMusicExtractor
         // Sort by track number to ensure proper order
         songs = songs.OrderBy(s => s.Number).ToList();
 
-        return songs.ToList(); // Reasonable limit for an album
+        return songs.ToList(); // Removed track limit for an album in 2.6.1
     }
 
     // Helper method to sort songs by their appearance order in the original content

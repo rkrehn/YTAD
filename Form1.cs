@@ -113,8 +113,9 @@ namespace YTPD
             // ensure a directory exists
             if (!Directory.Exists(txt_Dir.Text))
             {
-                MessageBox.Show("Directory does not exist! Please browse for a new directory.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                timer1.Enabled = false;
+                Directory.CreateDirectory(txt_Dir.Text);
+                //timer1.Enabled = false;
+                //MessageBox.Show("Directory does not exist! Please browse for a new directory.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -164,7 +165,14 @@ namespace YTPD
                     album = row.Cells["Album"].Value.ToString();
                     songnum = row.Cells["SongNum"].Value.ToString();
                     song = row.Cells["Song"].Value.ToString();
-                    duration = row.Cells["Duration"].Value.ToString();
+                    if (row.Cells["Duration"].Value.ToString() == null)
+                    {
+                        duration = "0:00";
+                    }
+                    else
+                    {
+                        duration = row.Cells["Duration"].Value.ToString();
+                    }
                     link = row.Cells["Link"].Value.ToString();
                     link = System.Text.RegularExpressions.Regex.Replace(link, @"&list=[^&]*", "");
 
@@ -212,16 +220,16 @@ namespace YTPD
                         string strargument;
                         if (chk_Cookies.Checked == true)
                         {
-                        // ensure cookie file exists
-                        if (!File.Exists(txt_Cookies.Text))
-                        {
-                            PauseSystem();
-                            MessageBox.Show("Cookie file does not exist! Please select a valid cookie file or uncheck 'Use Cookies'.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
+                            // ensure cookie file exists
+                            if (!File.Exists(txt_Cookies.Text))
+                            {
+                                PauseSystem();
+                                MessageBox.Show("Cookie file does not exist! Please select a valid cookie file or uncheck 'Use Cookies'.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return;
+                            }
+                            // use cookies
+                            strargument = $"-o \"{fullpath}\" -i -t mp3 --cookies {txt_Cookies.Text} \"{link}\"";
                         }
-                        // use cookies
-                        strargument = $"-o \"{fullpath}\" -i -t mp3 --cookies {txt_Cookies.Text} \"{link}\"";
-                    }
                         else
                         {
                             // no cookies
@@ -955,7 +963,6 @@ namespace YTPD
 
             txt_URL.Clear();
         }
-
         public static string DecodeText(string input)
         {
             if (string.IsNullOrEmpty(input))
@@ -969,7 +976,6 @@ namespace YTPD
 
             return decoded;
         }
-
         private void button1_Click_1(object sender, EventArgs e)
         {
             using (var fileBrowserDialog = new OpenFileDialog())

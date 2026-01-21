@@ -64,6 +64,7 @@ public class YouTubeMusicExtractor
             @"""flexColumns"":\[\{""musicResponsiveListItemFlexColumnRenderer"":\{""text"":\{""runs"":\[\{""text"":""([^""]+)"",""navigationEndpoint"":\{""clickTrackingParams""[^}]+""watchEndpoint"":\{""videoId"":""([A-Za-z0-9_-]{11})""",
         };
 
+
         var processedVideoIds = new HashSet<string>(); // Track videoIds we've seen
         var excludeWords = new[] { "plays", "minutes", "seconds", "Sign in", "Save", "Play", "Add",
                   "Share", "Go to", "Start", "Remove", "Improve", "Make", "Like",
@@ -198,7 +199,7 @@ public class YouTubeMusicExtractor
         // Sort by track number to ensure proper order
         songs = songs.OrderBy(s => s.Number).ToList();
 
-        return songs.Take(20).ToList(); // Reasonable limit for an album
+        return songs.ToList(); // Reasonable limit for an album
     }
 
     // Helper method to sort songs by their appearance order in the original content
@@ -404,7 +405,8 @@ public class YouTubeMusicExtractor
             name.Equals("Action menu", StringComparison.OrdinalIgnoreCase) ||
             name.StartsWith("Play ", StringComparison.OrdinalIgnoreCase) && name.Length < 15 ||
             name.StartsWith("Add ", StringComparison.OrdinalIgnoreCase) && name.Length < 15 ||
-            name.Contains(" - ") && name.Split(" - ").Length > 2 || // Multiple dashes
+            name.Contains("Song - ") || // More specific UI pattern
+            name.Contains("Track - ") || // More specific UI pattern
             Regex.IsMatch(name, @"^\d+:\d+$") || // Pure time format like "4:03"
             Regex.IsMatch(name, @"^\d+\s+(minutes?|seconds?)$")) // "2 minutes", "45 seconds"
             return false;

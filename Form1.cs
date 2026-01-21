@@ -42,7 +42,7 @@ namespace YTPD
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            GetAlbumInfo2Async(txt_URL.Text);
+            await GetAlbumInfo2Async(txt_URL.Text);
             //GetAlbumData(txt_URL.Text);
         }
 
@@ -113,9 +113,8 @@ namespace YTPD
             // ensure a directory exists
             if (!Directory.Exists(txt_Dir.Text))
             {
-                Directory.CreateDirectory(txt_Dir.Text);
-                //timer1.Enabled = false;
-                //MessageBox.Show("Directory does not exist! Please browse for a new directory.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Directory does not exist! Please browse for a new directory.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                timer1.Enabled = false;
                 return;
             }
 
@@ -165,14 +164,7 @@ namespace YTPD
                     album = row.Cells["Album"].Value.ToString();
                     songnum = row.Cells["SongNum"].Value.ToString();
                     song = row.Cells["Song"].Value.ToString();
-                    if (row.Cells["Duration"].Value.ToString() == null)
-                    {
-                        duration = "0:00";
-                    }
-                    else
-                    {
-                        duration = row.Cells["Duration"].Value.ToString();
-                    }
+                    duration = row.Cells["Duration"].Value.ToString();
                     link = row.Cells["Link"].Value.ToString();
                     link = System.Text.RegularExpressions.Regex.Replace(link, @"&list=[^&]*", "");
 
@@ -220,16 +212,16 @@ namespace YTPD
                         string strargument;
                         if (chk_Cookies.Checked == true)
                         {
-                            // ensure cookie file exists
-                            if (!File.Exists(txt_Cookies.Text))
-                            {
-                                PauseSystem();
-                                MessageBox.Show("Cookie file does not exist! Please select a valid cookie file or uncheck 'Use Cookies'.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                return;
-                            }
-                            // use cookies
-                            strargument = $"-o \"{fullpath}\" -i -t mp3 --cookies {txt_Cookies.Text} \"{link}\"";
+                        // ensure cookie file exists
+                        if (!File.Exists(txt_Cookies.Text))
+                        {
+                            PauseSystem();
+                            MessageBox.Show("Cookie file does not exist! Please select a valid cookie file or uncheck 'Use Cookies'.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
                         }
+                        // use cookies
+                        strargument = $"-o \"{fullpath}\" -i -t mp3 --cookies {txt_Cookies.Text} \"{link}\"";
+                    }
                         else
                         {
                             // no cookies
@@ -955,7 +947,7 @@ namespace YTPD
             // add each song to the datagridview
             foreach (var s in songs)
             {
-                dgv_downloads.Rows.Add(s.Artist, s.Album, s.Number, s.Name, s.Duration, s.Url, "0", "0", "No");
+                dgv_downloads.Rows.Add(DecodeText(s.Artist), DecodeText(s.Album), s.Number, DecodeText(s.Name), s.Duration, s.Url, "0", "0", "No");
             }
 
             // saves the table
@@ -963,6 +955,21 @@ namespace YTPD
 
             txt_URL.Clear();
         }
+
+        public static string DecodeText(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return input;
+
+            // First decode HTML entities
+            string decoded = System.Web.HttpUtility.HtmlDecode(input);
+
+            // Then decode Unicode escape sequences
+            decoded = System.Text.RegularExpressions.Regex.Unescape(decoded);
+
+            return decoded;
+        }
+
         private void button1_Click_1(object sender, EventArgs e)
         {
             using (var fileBrowserDialog = new OpenFileDialog())

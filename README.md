@@ -44,6 +44,14 @@ Press "Resume" to begin downloading music. Subdirectories will include one subdi
 3. [Download this file](https://github.com/rkrehn/YTAD/releases)
 4. Must have an empty folder dedicated for only music
 
+## Basic Troubleshooting
+
+- If you're having download issues: Download the latest yt-dlp.exe file from their [Github][https://github.com/yt-dlp/yt-dlp/releases]
+- Still having download issues? Try updating the cookie file.
+- If you're getting other errors when clicking "Resume": Right-click on the grid and click "clear data"
+- If artist/album is blank: Open a new issue. YouTube constantly updates their encryption so I need to update the decryption.
+- Remember: This is an open source project. You're welcome to submit solutions as well!
+
 ## Legal Disclaimer
 
 All music files downloaded through this software must be legally owned and purchased by the user. By downloading music via this software, you represent that you have purchased and fully own the rights to any downloaded content or an active subscription to YouTube Music. Downloading or distributing pirated or illegal music copies is strictly prohibited. I claim no ownership rights to any downloaded music files - all such rights remain with the content owner. I accept no liability for the illegal use of any files downloaded through this software. Please contact me if you have any questions about the legal use of downloaded music.

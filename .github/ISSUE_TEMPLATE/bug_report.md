@@ -7,32 +7,15 @@ assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+** You must answer these questions or I'm just going to close it. ***
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+1. Are you using the latest release?
+2. What is the link you tried to download (if you used one)?
+3. Are there rows of data on the app?
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+** If possible, please include the following? ***
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+Right-click on the grid and then select "Open Folder"
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
-
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
-
-**Additional context**
-Add any other context about the problem here.
+- grid.dat
+- error.log

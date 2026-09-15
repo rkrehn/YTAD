@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-<<<<<<< Updated upstream
-using System.Linq;
-using System.Text;
-=======
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
->>>>>>> Stashed changes
 using System.Text.RegularExpressions;
 
 public class Song
@@ -37,51 +32,6 @@ public static class YouTubeMusicExtractor
     {
         var songs = new List<Song>();
 
-<<<<<<< Updated upstream
-        // First decode any hex-encoded content
-        string decodedContent = DecodeHexContent(htmlContent);
-
-        // Extract album and artist information from page title
-        var albumInfo = ExtractAlbumInfo(htmlContent);
-
-        // Enhanced regex patterns to handle different YouTube Music data structures
-        var patterns = new[]
-        {
-            // Pattern 1: Standard format with navigationEndpoint (made more lenient)
-            @"""text"":""([^""]{1,50})"",""navigationEndpoint"":\{[^}]*""watchEndpoint"":\{""videoId"":""([A-Za-z0-9_-]{11})""",
-            
-            // Pattern 2: Hex-decoded format (made more lenient)
-            @"""text"":\{""runs"":\[\{""text"":""([^""]{1,50})"",""navigationEndpoint"":\{[^}]*""videoId"":""([A-Za-z0-9_-]{11})""",
-            
-            // Pattern 3: Direct text followed by videoId
-            @"""text"":""([^""]{1,50})""[^}]*""videoId"":""([A-Za-z0-9_-]{11})""",
-            
-            // Pattern 4: More flexible pattern for complex structures (updated)
-            @"""text"":""([A-Za-z0-9][^""]{0,49})"".*?""videoId"":""([A-Za-z0-9_-]{11})""",
-            
-            // Pattern 5: Handle accessibility data structure  
-            @"""accessibilityPlayData"":\{""accessibilityData"":\{""label"":""Play ([^""]+) - ([^""]+)""[^}]*""videoId"":""([A-Za-z0-9_-]{11})""",
-
-            // Pattern 6: Additional pattern for runs structure with different ordering
-            @"""runs"":\[\{""text"":""([^""]{1,50})""[^}]*\}[^}]*""watchEndpoint"":\{""videoId"":""([A-Za-z0-9_-]{11})""",
-            
-            // Pattern 7: Pattern specifically for numeric tracks and special characters
-            @"""text"":""(\d+|[A-Za-z0-9'&\s\-\(\)\.!?\[\]]{1,50})""[^}]*""navigationEndpoint""[^}]*""videoId"":""([A-Za-z0-9_-]{11})""",
-            
-            // Pattern 8: Fallback pattern for playNavigationEndpoint structure
-            @"""playNavigationEndpoint"":\{[^}]*""videoId"":""([A-Za-z0-9_-]{11})""[^}]*\}[^}]*""text"":\{""runs"":\[\{""text"":""([^""]{1,50})""",
-        
-            // Pattern 9: flexColumns structure - first column only (song title)
-            @"""flexColumns"":\[\{""musicResponsiveListItemFlexColumnRenderer"":\{""text"":\{""runs"":\[\{""text"":""([^""]+)"",""navigationEndpoint"":\{""clickTrackingParams""[^}]+""watchEndpoint"":\{""videoId"":""([A-Za-z0-9_-]{11})""",
-        };
-
-        var processedSongs = new HashSet<string>(); // Change to track videoId+songName
-        var excludeWords = new[] { "plays", "minutes", "seconds", "Sign in", "Save", "Play", "Add",
-                          "Share", "Go to", "Start", "Remove", "Improve", "Make", "Like",
-                          "Dislike", "Not a fan", "Action menu", "songs", "Album", "Artist",
-                          "View song", "thousand", "million", "Home", "Explore", "Library",
-                          "will play", "added to", "Song will", "Song added", "Track moved" };
-=======
         var startInfo = new ProcessStartInfo
         {
             FileName = ytDlpPath,
@@ -94,17 +44,11 @@ public static class YouTubeMusicExtractor
 
         using var process = new Process { StartInfo = startInfo };
         process.Start();
->>>>>>> Stashed changes
 
         string jsonOutput = await process.StandardOutput.ReadToEndAsync();
         await process.WaitForExitAsync();
 
-<<<<<<< Updated upstream
-        // Try ALL patterns instead of stopping after the first successful one
-        foreach (var pattern in patterns)
-=======
         if (process.ExitCode != 0 || string.IsNullOrWhiteSpace(jsonOutput))
->>>>>>> Stashed changes
         {
             return songs;
         }
@@ -126,224 +70,15 @@ public static class YouTubeMusicExtractor
                 int trackIndex = 1;
                 foreach (JsonElement entry in entries.EnumerateArray())
                 {
-<<<<<<< Updated upstream
-                    // Pattern 5 captures both song and artist
-                    songName = match.Groups[1].Value.Trim();
-                    artistFromPattern = match.Groups[2].Value.Trim();
-                    videoId = match.Groups[3].Value;
-                }
-                else if (pattern.Contains("playNavigationEndpoint") && match.Groups.Count > 2)
-                {
-                    // Pattern 8 has videoId first, then song name
-                    videoId = match.Groups[1].Value;
-                    songName = match.Groups[2].Value.Trim();
-                }
-                else
-                {
-                    songName = match.Groups[1].Value.Trim();
-                    videoId = match.Groups[2].Value;
-                }
-
-                // Fix any encoded characters in the song name
-                songName = DecodeText(songName);
-
-                // NEW: Clean up leading/trailing special characters (pipes, spaces, etc.)
-                songName = songName.Trim().TrimStart('|', ' ', '-', '/', '\\').TrimEnd('|', ' ', '-', '/', '\\').Trim();
-                string compositeKey = $"{videoId}|{songName}";
-
-                // Skip if we've already processed this exact song
-                if (processedSongs.Contains(compositeKey))
-                    continue;
-=======
                     string videoId = entry.TryGetProperty("id", out var idProp) ? idProp.GetString() : null;
                     if (string.IsNullOrEmpty(videoId)) continue;
 
                     string trackTitle = entry.TryGetProperty("title", out var tProp) ? tProp.GetString() : null;
->>>>>>> Stashed changes
 
                     // Extract track-level artist, falling back to album artist
                     string trackArtist = ExtractArtist(entry);
                     if (string.IsNullOrEmpty(trackArtist))
                     {
-<<<<<<< Updated upstream
-                        Number = 0, // Will be set properly later
-                        Name = songName,
-                        VideoId = videoId,
-                        Album = albumInfo?.Album,
-                        Artist = artistFromPattern ?? albumInfo?.Artist
-                    };
-
-                    // NEW: Try to extract the actual track index from the HTML
-                    var trackIndex = ExtractTrackIndex(decodedContent, videoId);
-                    if (trackIndex.HasValue)
-                    {
-                        song.Number = trackIndex.Value;
-                    }
-
-                    if (IsValidSong(song))
-                    {
-                        songs.Add(song);
-                        // Use composite key for deduplication, but keep videoId for duration mapping
-                        if (!songDataMap.ContainsKey(videoId))
-                        {
-                            songDataMap[videoId] = song;
-                        }
-                        processedSongs.Add(compositeKey);
-                    }
-                    else
-                    {
-                        WriteError($"INVALID SONG DATA: '{songName}' (VideoID: {videoId}) - Missing required fields");
-                    }
-
-                    // Use composite key for deduplication, but keep videoId for duration mapping
-                    if (!songDataMap.ContainsKey(videoId))
-                    {
-                        songDataMap[videoId] = song;
-                    }
-                    processedSongs.Add(compositeKey);
-                }
-                else
-                {
-                    // DEBUG: Log rejected songs
-                    WriteError($"REJECTED: '{songName}' (VideoID: {videoId})");
-                }
-
-                // REMOVED: Early termination logic that was causing issues
-                // This allows all patterns to be tried and all songs to be found
-            }
-        }
-
-        // Sort songs by their appearance order in the original content
-        songs = SortSongsByOriginalOrder(songs, decodedContent);
-
-        // Extract durations for the songs we found
-        ExtractDurations(decodedContent, songDataMap);
-
-        // Assign correct track numbers AFTER sorting
-        for (int i = 0; i < songs.Count; i++)
-        {
-            if (songs[i].Number == 0) // If we didn't extract a track number from HTML
-            {
-                songs[i].Number = i + 1; // Fall back to sequential numbering
-            }
-        }
-
-        songs = songs.OrderBy(s => s.Number).ToList();
-        return songs.Take(20).ToList(); // Reasonable limit for an album
-    }
-
-    // NEW: Helper method to sort songs by their appearance order in the original content
-    private static List<Song> SortSongsByOriginalOrder(List<Song> songs, string content)
-    {
-        var songsWithPositions = new List<(Song song, int position)>();
-
-        foreach (var song in songs)
-        {
-            // Find the first occurrence of this video ID in the content
-            int position = content.IndexOf(song.VideoId, StringComparison.OrdinalIgnoreCase);
-            if (position == -1)
-            {
-                // Fallback: search for song name in quotes
-                position = content.IndexOf($"\"{song.Name}\"", StringComparison.OrdinalIgnoreCase);
-            }
-            songsWithPositions.Add((song, position == -1 ? int.MaxValue : position));
-        }
-
-        // Sort by position in the original content
-        return songsWithPositions
-            .OrderBy(x => x.position)
-            .Select(x => x.song)
-            .ToList();
-    }
-
-
-    public static string DecodeText(string input)
-    {
-        if (string.IsNullOrEmpty(input))
-            return input;
-
-        // First decode HTML entities
-        string decoded = System.Web.HttpUtility.HtmlDecode(input);
-
-        // Then decode Unicode escape sequences
-        decoded = System.Text.RegularExpressions.Regex.Unescape(decoded);
-
-        return decoded;
-    }
-
-    private static AlbumInfo ExtractAlbumInfo(string htmlContent)
-    {
-        // Pattern to match: <title>De Profundis - Album by VADER</title>
-        var titlePattern = @"<title>([^-]+) - Album by ([^<]+)</title>";
-        var match = Regex.Match(htmlContent, titlePattern);
-
-        if (match.Success)
-        {
-            return new AlbumInfo
-            {
-                Album = DecodeText(match.Groups[1].Value.Trim()),
-                Artist = DecodeText(match.Groups[2].Value.Trim())
-            };
-        }
-
-        // Fallback pattern for other title formats
-        var alternatePattern = @"<title>([^|]+) \| ([^<]+)</title>";
-        match = Regex.Match(htmlContent, alternatePattern);
-
-        if (match.Success)
-        {
-            var parts = match.Groups[1].Value.Split('-');
-            if (parts.Length >= 2)
-            {
-                return new AlbumInfo
-                {
-                    Album = DecodeText(parts[0].Trim()),
-                    Artist = DecodeText(parts[1].Trim())
-                };
-            }
-        }
-
-        return null;
-    }
-
-    private static void ExtractDurations(string decodedContent, Dictionary<string, Song> songDataMap)
-    {
-        // Pattern to match duration in fixedColumns sections
-        // Looking for: "text":{"runs":[{"text":"4:03"}]} in fixedColumns after a song
-        var durationPattern = @"""fixedColumns"":\[[^]]*""text"":\{""runs"":\[\{""text"":""(\d+:\d{2})""";
-        var matches = Regex.Matches(decodedContent, durationPattern);
-
-        // Also try a more specific pattern that looks for the duration near videoId
-        var contextualDurationPattern = @"""videoId"":""([A-Za-z0-9_-]{11})""[^}]*}[^}]*}[^}]*""fixedColumns"":\[[^]]*""text"":\{""runs"":\[\{""text"":""(\d+:\d{2})""";
-        var contextualMatches = Regex.Matches(decodedContent, contextualDurationPattern);
-
-        // Process contextual matches first (more reliable)
-        foreach (Match match in contextualMatches)
-        {
-            var videoId = match.Groups[1].Value;
-            var duration = match.Groups[2].Value;
-
-            if (songDataMap.ContainsKey(videoId))
-            {
-                songDataMap[videoId].Duration = duration;
-            }
-        }
-
-
-
-        // For songs without duration from contextual matching, try to match by position
-        if (matches.Count > 0 && songDataMap.Values.Any(s => string.IsNullOrEmpty(s.Duration)))
-        {
-            var songsWithoutDuration = songDataMap.Values.Where(s => string.IsNullOrEmpty(s.Duration)).ToList();
-
-            for (int i = 0; i < Math.Min(matches.Count, songsWithoutDuration.Count); i++)
-            {
-                var duration = matches[i].Groups[1].Value;
-                // Simple validation - should be in format M:SS or MM:SS
-                if (Regex.IsMatch(duration, @"^\d{1,2}:\d{2}$"))
-                {
-                    songsWithoutDuration[i].Duration = duration;
-=======
                         trackArtist = albumArtist;
                     }
 
@@ -364,112 +99,16 @@ public static class YouTubeMusicExtractor
                         Artist = trackArtist,
                         Duration = duration
                     });
->>>>>>> Stashed changes
                 }
             }
         }
         catch (JsonException)
         {
-<<<<<<< Updated upstream
-            var songContextPattern = $@"""{Regex.Escape(song.Name)}""[^}}]*}}[^}}]*""text"":\{{""runs"":\[\{{""text"":""(\d+:\d{{2}})""";
-            var contextMatch = Regex.Match(decodedContent, songContextPattern);
-
-            if (contextMatch.Success)
-            {
-                song.Duration = contextMatch.Groups[1].Value;
-            }
-        }
-    }
-
-    private static string DecodeHexContent(string content)
-    {
-        // Decode common hex sequences found in YouTube Music data
-        return content.Replace("\\x22", "\"")
-                     .Replace("\\x5b", "[")
-                     .Replace("\\x5d", "]")
-                     .Replace("\\x7b", "{")
-                     .Replace("\\x7d", "}")
-                     .Replace("\\x3d", "=")
-                     .Replace("\\x26", "&")
-                     .Replace("\\x2c", ",")
-                     .Replace("\\x3a", ":")
-                     .Replace("\\x5c", "\\")
-                     .Replace("\\x2f", "/")
-                     .Replace("\\x27", "'")
-                     .Replace("\\x28", "(")
-                     .Replace("\\x29", ")")
-                     .Replace("\\x2d", "-")
-                     .Replace("\\x2e", ".");
-    }
-
-    // UPDATED: More lenient validation for numeric tracks like "111"
-    private static bool IsValidSongName(string name, string[] excludeWords)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return false;
-
-        if (name.Length < 1)
-            return false;
-
-        // Special case: Allow pure numeric track names (like "111") if they're reasonable length
-        // BUT exclude 1-2 digit numbers which are almost certainly track numbers, not song names
-        if (Regex.IsMatch(name, @"^\d+$"))
-        {
-            // Only allow numeric names that are 3+ digits (like "111", "2112", etc.)
-            if (name.Length >= 3 && name.Length <= 5)
-                return true;
-            else
-                return false;
-        }
-
-        // For non-numeric names, require at least 2 characters
-        if (name.Length < 2)
-            return false;
-
-        // Must start with a letter or number
-        if (!char.IsLetterOrDigit(name[0]))
-            return false;
-
-        // Check for exact matches or very close matches with UI text
-        foreach (var word in excludeWords)
-        {
-            // Exact match - definitely UI text
-            if (name.Equals(word, StringComparison.OrdinalIgnoreCase))
-                return false;
-
-            // For short names containing common UI words, be suspicious
-            if (name.Length < 20 && name.Contains(word, StringComparison.OrdinalIgnoreCase))
-            {
-                // Allow if it's clearly part of a longer title (has other substantial content)
-                if (name.Length < word.Length + 5)
-                    return false;
-            }
-        }
-
-        // Check for specific UI patterns (be precise, not broad)
-        if (name.Contains("K plays") || // "20K plays", "39K plays"
-            name.Contains("thousand plays") ||
-            name.Contains("million plays") ||
-            name.Contains("Song will play next") ||
-            name.Contains("Song added to queue") ||
-            name.Contains("Save to playlist") ||
-            name.Contains("•") || // UI separators
-            name.Length > 150 || // Reasonable limit
-            name.Equals("Pause", StringComparison.OrdinalIgnoreCase) ||
-            name.Equals("Action menu", StringComparison.OrdinalIgnoreCase) ||
-            name.StartsWith("Play ", StringComparison.OrdinalIgnoreCase) && name.Length < 15 ||
-            name.StartsWith("Add ", StringComparison.OrdinalIgnoreCase) && name.Length < 15 ||
-            name.Contains(" - ") && name.Split(" - ").Length > 2 || // Multiple dashes
-            Regex.IsMatch(name, @"^\d+:\d+$") || // Pure time format like "4:03"
-            Regex.IsMatch(name, @"^\d+\s+(minutes?|seconds?)$")) // "2 minutes", "45 seconds"
-            return false;
-=======
             // Handle parsing exceptions gracefully
         }
 
         return songs;
     }
->>>>>>> Stashed changes
 
     private static string CleanAlbumName(string rawAlbum)
     {
@@ -501,62 +140,5 @@ public static class YouTubeMusicExtractor
 
         // Strip YouTube's auto-generated channel suffix (e.g., "Behemoth - Topic" -> "Behemoth")
         return TopicSuffixRegex.Replace(artist, "").Trim();
-    }
-
-    private static int? ExtractTrackIndex(string decodedContent, string videoId)
-    {
-        // Pattern to find the index near a specific videoId
-        // Looking for: "videoId":"8F2nfvH9glI"......"index":{"runs":[{"text":"6"}]}
-        var indexPattern = $@"""videoId"":""{Regex.Escape(videoId)}"".*?""index"":\{{""runs"":\[\{{""text"":""(\d+)""";
-        var match = Regex.Match(decodedContent, indexPattern, RegexOptions.Singleline);
-
-        if (match.Success && int.TryParse(match.Groups[1].Value, out int trackNum))
-        {
-            return trackNum;
-        }
-
-        return null;
-    }
-
-    // CHANGE WriteError to static so it can be called from static context
-    private static void WriteError(string msg)
-    {
-        string strFile = Application.StartupPath + "\\error.log";
-        if (!System.IO.File.Exists(strFile)) System.IO.File.Create(strFile);
-
-        using (var sr = new StreamWriter(strFile, true, Encoding.UTF8))
-        {
-            sr.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " - " + msg);
-        }
-    }
-
-    // Add this helper method to your class
-    private static bool IsValidSong(Song song)
-    {
-        // Must have a video ID
-        if (string.IsNullOrWhiteSpace(song.VideoId) || song.VideoId.Length != 11)
-            return false;
-
-        // Must have a song name
-        if (string.IsNullOrWhiteSpace(song.Name))
-            return false;
-
-        // Song name must pass the existing validation
-        // (this is redundant since we already checked, but adds safety)
-        if (song.Name.Length < 1)
-            return false;
-
-        // Optional: Require artist (comment out if not needed)
-        if (string.IsNullOrWhiteSpace(song.Artist))
-            return false;
-
-        // Optional: Require album (comment out if not needed)
-        if (string.IsNullOrWhiteSpace(song.Album))
-            return false;
-
-        // Optional: Warn if no duration but don't reject
-        // Duration will be filled in later by ExtractDurations
-
-        return true;
     }
 }

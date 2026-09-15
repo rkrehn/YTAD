@@ -470,11 +470,7 @@
             Margin = new Padding(3, 2, 3, 2);
             MaximizeBox = false;
             Name = "Form1";
-<<<<<<< Updated upstream
-            Text = "YouTube Album Downloader v2.4";
-=======
             Text = "YouTube Album Downloader v3.0";
->>>>>>> Stashed changes
             FormClosing += Form1_FormClosing;
             Load += Form1_Load;
             ((System.ComponentModel.ISupportInitialize)dgv_downloads).EndInit();

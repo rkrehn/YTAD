@@ -984,19 +984,8 @@ namespace YTPD
 
         private async Task GetAlbumInfo2Async(string url)
         {
-            // connect to the internets
-            using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("User-Agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/145.0");
-            client.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.9");
-
-            // Explicitly handle encoding
-            var response = await client.GetAsync(url);
-            var bytes = await response.Content.ReadAsByteArrayAsync();
-            var html = Encoding.UTF8.GetString(bytes);
-
             // get the songs from the HTML
-            var songs = YouTubeMusicExtractor.ExtractSongs(html);
+            var songs = await YouTubeMusicExtractor.ExtractSongsAsync(url);
 
             // add each song to the datagridview
             foreach (var s in songs)
@@ -1086,75 +1075,6 @@ namespace YTPD
                         }
                     }
                 }
-
-                // refresh table
-                dgv_downloads.Refresh();
-
-                // save
-                SaveDataGridViewToCSV();
-            }
-        }
-
-        private void dgv_downloads_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            int rowIndex = dgv_downloads.CurrentCell?.RowIndex ?? -1;
-            dgv_downloads.Rows[rowIndex].Selected = true;
-        }
-
-        private void correctAlbumToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (dgv_downloads.SelectedRows.Count == 0) return;
-
-            int rowIndex = dgv_downloads.CurrentCell?.RowIndex ?? -1;
-
-            // get the selected band name
-            string albumname = dgv_downloads.Rows[rowIndex].Cells["Album"].Value.ToString();
-
-            // correct the band name
-            string userInput = Interaction.InputBox("If the album name is incorrect, this is your chance to update it:", "YTAD", albumname);
-
-            // if null then ignore
-            if (userInput != null && userInput.Length > 1)
-            {
-                // update band name for each row with the wrong band name
-                foreach (DataGridViewRow row in dgv_downloads.Rows)
-                {
-                    // no null cells!
-                    if (row.Cells["Album"].Value != null && row.Cells["Album"].Value.ToString().Length > 1)
-                    {
-                        // if the album name is the same as the one that needs correcting then correct it
-                        if (row.Cells["Album"].Value.ToString() == albumname)
-                        {
-                            row.Cells["Album"].Value = userInput;
-                        }
-                    }
-                }
-
-                // refresh table
-                dgv_downloads.Refresh();
-
-                // save
-                SaveDataGridViewToCSV();
-            }
-        }
-
-        private void correctSongToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (dgv_downloads.SelectedRows.Count == 0) return;
-
-            int rowIndex = dgv_downloads.CurrentCell?.RowIndex ?? -1;
-
-            // get the selected band name
-            string songname = dgv_downloads.Rows[rowIndex].Cells["Song"].Value.ToString();
-
-            // correct the band name
-            string userInput = Interaction.InputBox("If the song name is incorrect, this is your chance to update it:", "YTAD", songname);
-
-            // if null then ignore
-            if (userInput != null && userInput.Length > 1)
-            {
-                // update song name
-                dgv_downloads.Rows[rowIndex].Cells["Song"].Value = userInput;
 
                 // refresh table
                 dgv_downloads.Refresh();

@@ -1,17 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+<<<<<<< Updated upstream
 using System.Linq;
 using System.Text;
+=======
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
+>>>>>>> Stashed changes
 using System.Text.RegularExpressions;
 
 public class Song
 {
     public int Number { get; set; }
     public string Name { get; set; }
-    public string Artist { get; set; }
-    public string Album { get; set; }
     public string VideoId { get; set; }
-    public string Duration { get; set; } // Format: "4:03"
+    public string Album { get; set; }
+    public string Artist { get; set; }
+    public string Duration { get; set; }
     public string Url => $"https://music.youtube.com/watch?v={VideoId}";
 }
 
@@ -21,12 +28,16 @@ public class AlbumInfo
     public string Artist { get; set; }
 }
 
-public class YouTubeMusicExtractor
+public static class YouTubeMusicExtractor
 {
-    public static List<Song> ExtractSongs(string htmlContent)
+    private static readonly Regex AlbumPrefixRegex = new Regex(@"^(Album|EP|Single)\s*-\s*", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex TopicSuffixRegex = new Regex(@"\s*-\s*Topic$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    public static async Task<List<Song>> ExtractSongsAsync(string albumUrl, string ytDlpPath = "yt-dlp")
     {
         var songs = new List<Song>();
 
+<<<<<<< Updated upstream
         // First decode any hex-encoded content
         string decodedContent = DecodeHexContent(htmlContent);
 
@@ -70,22 +81,52 @@ public class YouTubeMusicExtractor
                           "Dislike", "Not a fan", "Action menu", "songs", "Album", "Artist",
                           "View song", "thousand", "million", "Home", "Explore", "Library",
                           "will play", "added to", "Song will", "Song added", "Track moved" };
+=======
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = ytDlpPath,
+            Arguments = $"--dump-single-json --flat-playlist \"{albumUrl}\"",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
 
-        // Dictionary to store song data temporarily for duration matching
-        var songDataMap = new Dictionary<string, Song>();
+        using var process = new Process { StartInfo = startInfo };
+        process.Start();
+>>>>>>> Stashed changes
 
+        string jsonOutput = await process.StandardOutput.ReadToEndAsync();
+        await process.WaitForExitAsync();
+
+<<<<<<< Updated upstream
         // Try ALL patterns instead of stopping after the first successful one
         foreach (var pattern in patterns)
+=======
+        if (process.ExitCode != 0 || string.IsNullOrWhiteSpace(jsonOutput))
+>>>>>>> Stashed changes
         {
-            var matches = Regex.Matches(decodedContent, pattern, RegexOptions.IgnoreCase);
+            return songs;
+        }
 
-            foreach (Match match in matches)
+        try
+        {
+            using JsonDocument doc = JsonDocument.Parse(jsonOutput);
+            JsonElement root = doc.RootElement;
+
+            // 1. Clean Album Name (Strips "Album - ", "EP - ", etc.)
+            string rawAlbum = root.TryGetProperty("title", out var titleProp) ? titleProp.GetString() : null;
+            string cleanAlbum = CleanAlbumName(rawAlbum);
+
+            // 2. Resolve Fallback Album Artist
+            string albumArtist = ExtractArtist(root);
+
+            if (root.TryGetProperty("entries", out JsonElement entries) && entries.ValueKind == JsonValueKind.Array)
             {
-                string songName, videoId, artistFromPattern = null;
-
-                // Handle different pattern capture groups
-                if (pattern.Contains("accessibilityPlayData") && match.Groups.Count > 3)
+                int trackIndex = 1;
+                foreach (JsonElement entry in entries.EnumerateArray())
                 {
+<<<<<<< Updated upstream
                     // Pattern 5 captures both song and artist
                     songName = match.Groups[1].Value.Trim();
                     artistFromPattern = match.Groups[2].Value.Trim();
@@ -113,12 +154,18 @@ public class YouTubeMusicExtractor
                 // Skip if we've already processed this exact song
                 if (processedSongs.Contains(compositeKey))
                     continue;
+=======
+                    string videoId = entry.TryGetProperty("id", out var idProp) ? idProp.GetString() : null;
+                    if (string.IsNullOrEmpty(videoId)) continue;
 
-                // Validate the song name
-                if (IsValidSongName(songName, excludeWords))
-                {
-                    var song = new Song
+                    string trackTitle = entry.TryGetProperty("title", out var tProp) ? tProp.GetString() : null;
+>>>>>>> Stashed changes
+
+                    // Extract track-level artist, falling back to album artist
+                    string trackArtist = ExtractArtist(entry);
+                    if (string.IsNullOrEmpty(trackArtist))
                     {
+<<<<<<< Updated upstream
                         Number = 0, // Will be set properly later
                         Name = songName,
                         VideoId = videoId,
@@ -296,13 +343,34 @@ public class YouTubeMusicExtractor
                 if (Regex.IsMatch(duration, @"^\d{1,2}:\d{2}$"))
                 {
                     songsWithoutDuration[i].Duration = duration;
+=======
+                        trackArtist = albumArtist;
+                    }
+
+                    // Duration calculation (seconds -> m:ss)
+                    string duration = "Unknown";
+                    if (entry.TryGetProperty("duration", out var durProp) && durProp.ValueKind == JsonValueKind.Number)
+                    {
+                        TimeSpan span = TimeSpan.FromSeconds(durProp.GetDouble());
+                        duration = span.ToString(@"m\:ss");
+                    }
+
+                    songs.Add(new Song
+                    {
+                        Number = trackIndex++,
+                        Name = trackTitle,
+                        VideoId = videoId,
+                        Album = cleanAlbum,
+                        Artist = trackArtist,
+                        Duration = duration
+                    });
+>>>>>>> Stashed changes
                 }
             }
         }
-
-        // Final fallback: look for any duration pattern near song names
-        foreach (var song in songDataMap.Values.Where(s => string.IsNullOrEmpty(s.Duration)))
+        catch (JsonException)
         {
+<<<<<<< Updated upstream
             var songContextPattern = $@"""{Regex.Escape(song.Name)}""[^}}]*}}[^}}]*""text"":\{{""runs"":\[\{{""text"":""(\d+:\d{{2}})""";
             var contextMatch = Regex.Match(decodedContent, songContextPattern);
 
@@ -395,8 +463,44 @@ public class YouTubeMusicExtractor
             Regex.IsMatch(name, @"^\d+:\d+$") || // Pure time format like "4:03"
             Regex.IsMatch(name, @"^\d+\s+(minutes?|seconds?)$")) // "2 minutes", "45 seconds"
             return false;
+=======
+            // Handle parsing exceptions gracefully
+        }
 
-        return true;
+        return songs;
+    }
+>>>>>>> Stashed changes
+
+    private static string CleanAlbumName(string rawAlbum)
+    {
+        if (string.IsNullOrWhiteSpace(rawAlbum)) return null;
+
+        // Strip leading "Album - ", "EP - ", or "Single - "
+        return AlbumPrefixRegex.Replace(rawAlbum, "").Trim();
+    }
+
+    private static string ExtractArtist(JsonElement element)
+    {
+        string artist = null;
+
+        // Check primary artist metadata properties
+        if (element.TryGetProperty("artist", out var aProp) && !string.IsNullOrWhiteSpace(aProp.GetString()))
+        {
+            artist = aProp.GetString();
+        }
+        else if (element.TryGetProperty("creator", out var cProp) && !string.IsNullOrWhiteSpace(cProp.GetString()))
+        {
+            artist = cProp.GetString();
+        }
+        else if (element.TryGetProperty("uploader", out var uProp) && !string.IsNullOrWhiteSpace(uProp.GetString()))
+        {
+            artist = uProp.GetString();
+        }
+
+        if (string.IsNullOrWhiteSpace(artist)) return null;
+
+        // Strip YouTube's auto-generated channel suffix (e.g., "Behemoth - Topic" -> "Behemoth")
+        return TopicSuffixRegex.Replace(artist, "").Trim();
     }
 
     private static int? ExtractTrackIndex(string decodedContent, string videoId)

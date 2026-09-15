@@ -61,6 +61,7 @@
             correctArtistToolStripMenuItem = new ToolStripMenuItem();
             correctAlbumToolStripMenuItem = new ToolStripMenuItem();
             correctSongToolStripMenuItem = new ToolStripMenuItem();
+            removeSongToolMenuItem1 = new ToolStripMenuItem();
             toolStripSeparator2 = new ToolStripSeparator();
             RestartBadItems = new ToolStripMenuItem();
             lbl_status = new Label();
@@ -263,9 +264,9 @@
             // 
             // contextMenuStrip1
             // 
-            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { menu_cleardata, openDataFileToolStripMenuItem, saveTableToolStripMenuItem, toolStripSeparator1, correctArtistToolStripMenuItem, correctAlbumToolStripMenuItem, correctSongToolStripMenuItem, toolStripSeparator2, RestartBadItems });
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { menu_cleardata, openDataFileToolStripMenuItem, saveTableToolStripMenuItem, toolStripSeparator1, correctArtistToolStripMenuItem, correctAlbumToolStripMenuItem, correctSongToolStripMenuItem, removeSongToolMenuItem1, toolStripSeparator2, RestartBadItems });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(213, 170);
+            contextMenuStrip1.Size = new Size(213, 192);
             // 
             // menu_cleardata
             // 
@@ -313,6 +314,13 @@
             correctSongToolStripMenuItem.Size = new Size(212, 22);
             correctSongToolStripMenuItem.Text = "Correct Song";
             correctSongToolStripMenuItem.Click += correctSongToolStripMenuItem_Click;
+            // 
+            // removeSongToolMenuItem1
+            // 
+            removeSongToolMenuItem1.Name = "removeSongToolMenuItem1";
+            removeSongToolMenuItem1.Size = new Size(212, 22);
+            removeSongToolMenuItem1.Text = "Remove Song";
+            removeSongToolMenuItem1.Click += removeSongToolMenuItem1_Click;
             // 
             // toolStripSeparator2
             // 
@@ -462,7 +470,11 @@
             Margin = new Padding(3, 2, 3, 2);
             MaximizeBox = false;
             Name = "Form1";
+<<<<<<< Updated upstream
             Text = "YouTube Album Downloader v2.4";
+=======
+            Text = "YouTube Album Downloader v3.0";
+>>>>>>> Stashed changes
             FormClosing += Form1_FormClosing;
             Load += Form1_Load;
             ((System.ComponentModel.ISupportInitialize)dgv_downloads).EndInit();
@@ -516,5 +528,6 @@
         private DataGridViewTextBoxColumn Converted;
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripSeparator toolStripSeparator2;
+        private ToolStripMenuItem removeSongToolMenuItem1;
     }
 }

@@ -26,6 +26,17 @@ namespace YTPD
         public static bool isPaused = false;
         public static bool isSaving = false;
         public string albumURL = "";
+
+        public record SongDef
+        {
+            public int Number { get; init; }
+            public string Name { get; init; }
+            public string VideoId { get; init; }
+            public string Album { get; init; }
+            public string Artist { get; init; }
+            public string Duration { get; init; }
+            public string Url => $"https://music.youtube.com/watch?v={VideoId}";
+        }
         public Form1()
         {
             InitializeComponent();
@@ -42,7 +53,7 @@ namespace YTPD
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            GetAlbumInfo2Async(txt_URL.Text);
+            await GetAlbumInfo2Async(txt_URL.Text);
             //GetAlbumData(txt_URL.Text);
         }
 
@@ -136,7 +147,7 @@ namespace YTPD
                 if (isPaused) return;
 
                 // delete empty rows
-                if (row.Cells[0].Value == null || row.Cells[0].Value.ToString().Length < 1)
+                if (row.Cells[3].Value == null || row.Cells[3].Value.ToString().Length < 1)
                 {
                     try
                     {
@@ -165,7 +176,14 @@ namespace YTPD
                     album = row.Cells["Album"].Value.ToString();
                     songnum = row.Cells["SongNum"].Value.ToString();
                     song = row.Cells["Song"].Value.ToString();
-                    duration = row.Cells["Duration"].Value.ToString();
+                    if (row.Cells["Duration"].Value.ToString() == null)
+                    {
+                        duration = "0:00";
+                    }
+                    else
+                    {
+                        duration = row.Cells["Duration"].Value.ToString();
+                    }
                     link = row.Cells["Link"].Value.ToString();
                     link = System.Text.RegularExpressions.Regex.Replace(link, @"&list=[^&]*", "");
 
@@ -357,7 +375,42 @@ namespace YTPD
             timer1.Enabled = true;
         }
 
-        static async Task ConvertFile(string inputFilePath, string fileExt)
+        private async Task UpdateYtDlp()
+        {
+            try
+            {
+                // Start the process
+                Process process = new Process();
+                process.StartInfo.FileName = "yt-dlp.exe"; // Ensure yt-dlp.exe is in the PATH or provide full path
+                process.StartInfo.Arguments = "-U"; // Update command
+                process.StartInfo.RedirectStandardOutput = true; // Capture output
+                process.StartInfo.RedirectStandardError = true; // Capture errors
+                process.StartInfo.UseShellExecute = false; // Required for redirection
+                process.StartInfo.CreateNoWindow = true; // Hide the window
+
+                // Start the process
+                process.Start();
+
+                // Wait for the process to complete asynchronously
+                await process.WaitForExitAsync();
+
+                // Read the output (optional)
+                string output = await process.StandardOutput.ReadToEndAsync();
+                string errors = await process.StandardError.ReadToEndAsync();
+
+                // Display the output (optional)
+                if (!string.IsNullOrEmpty(errors))
+                {
+                    WriteError(errors);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                WriteError($"An error occurred: {ex.Message}");
+            }
+        }
+            static async Task ConvertFile(string inputFilePath, string fileExt)
         {
             // setup variables and output path 
             string outputFilePath = inputFilePath.Replace(fileExt, ".mp3");
@@ -711,6 +764,7 @@ namespace YTPD
 
         private void btn_Resume_Click(object sender, EventArgs e)
         {
+            UpdateYtDlp();
             isPaused = false;
             timer1.Enabled = true;
             //timer_convert.Enabled = true;
@@ -1108,6 +1162,91 @@ namespace YTPD
                 // save
                 SaveDataGridViewToCSV();
             }
+        }
+
+        private void dgv_downloads_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            int rowIndex = dgv_downloads.CurrentCell?.RowIndex ?? -1;
+            dgv_downloads.Rows[rowIndex].Selected = true;
+        }
+
+        private void correctAlbumToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (dgv_downloads.SelectedRows.Count == 0) return;
+
+            int rowIndex = dgv_downloads.CurrentCell?.RowIndex ?? -1;
+
+            // get the selected band name
+            string albumname = dgv_downloads.Rows[rowIndex].Cells["Album"].Value.ToString();
+
+            // correct the band name
+            string userInput = Interaction.InputBox("If the album name is incorrect, this is your chance to update it:", "YTAD", albumname);
+
+            // if null then ignore
+            if (userInput != null && userInput.Length > 1)
+            {
+                // update band name for each row with the wrong band name
+                foreach (DataGridViewRow row in dgv_downloads.Rows)
+                {
+                    // no null cells!
+                    if (row.Cells["Album"].Value != null && row.Cells["Album"].Value.ToString().Length > 1)
+                    {
+                        // if the album name is the same as the one that needs correcting then correct it
+                        if (row.Cells["Album"].Value.ToString() == albumname)
+                        {
+                            row.Cells["Album"].Value = userInput;
+                        }
+                    }
+                }
+
+                // refresh table
+                dgv_downloads.Refresh();
+
+                // save
+                SaveDataGridViewToCSV();
+            }
+        }
+
+        private void correctSongToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (dgv_downloads.SelectedRows.Count == 0) return;
+
+            int rowIndex = dgv_downloads.CurrentCell?.RowIndex ?? -1;
+
+            // get the selected band name
+            string songname = dgv_downloads.Rows[rowIndex].Cells["Song"].Value.ToString();
+
+            // correct the band name
+            string userInput = Interaction.InputBox("If the song name is incorrect, this is your chance to update it:", "YTAD", songname);
+
+            // if null then ignore
+            if (userInput != null && userInput.Length > 1)
+            {
+                // update song name
+                dgv_downloads.Rows[rowIndex].Cells["Song"].Value = userInput;
+
+                // refresh table
+                dgv_downloads.Refresh();
+
+                // save
+                SaveDataGridViewToCSV();
+            }
+        }
+
+        private void removeSongToolMenuItem1_Click(object sender, EventArgs e)
+        {
+            if (dgv_downloads.SelectedRows.Count == 0) return;
+
+            int rowIndex = dgv_downloads.CurrentCell?.RowIndex ?? -1;
+
+            // remove the selected row
+            dgv_downloads.Rows.RemoveAt(rowIndex);
+
+            // refresh table
+            dgv_downloads.Refresh();
+
+            // save
+            SaveDataGridViewToCSV();
         }
     }
 }

@@ -56,69 +56,6 @@ namespace YTPD
             await GetAlbumInfo2Async(txt_URL.Text);
             //GetAlbumData(txt_URL.Text);
         }
-
-        //private async Task GetAlbumData(string theURL)
-        //{
-        //    btn_GetAlbum.Enabled = false;
-        //    var youtube = new YoutubeClient();
-        //    string album = "";
-        //    string thumb = "";
-
-        //    // You can specify either the video URL or its ID
-        //    try
-        //    {
-        //        var albuminfo = await youtube.Playlists.GetAsync(theURL);
-        //        album = albuminfo.Title;
-        //        thumb = albuminfo.Thumbnails[1].Url;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        WriteError(ex.ToString());
-        //        MessageBox.Show("Unable to add album. Please copy/paste again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //        btn_GetAlbum.Enabled = true;
-        //        return;
-        //    }
-
-        //    // Sometimes YouTube adds "Album - " or "- Topic" to the front/back of the album name, so let's clean that up
-        //    album = album.Replace("Album - ", "");
-        //    album = album.Replace("- Topic", "");
-
-        //    // Get all playlist videos
-        //    Int16 songnum = 1;
-
-        //    try
-        //    {
-        //        // Basically a foreach loop, but async and add a row for each song
-        //        await foreach (var video in youtube.Playlists.GetVideosAsync(theURL))
-        //        {
-        //            var title = video.Title;
-        //            var band = video.Author.ChannelTitle;
-        //            var author = video.Author;
-        //            var duration = video.Duration;
-        //            var link = video.Url;
-
-        //            band = band.Replace("- Topic", "").Trim();
-
-        //            dgv_downloads.Rows.Add(band, album, songnum.ToString(), title, duration, link, "0", "0", "No");
-        //            songnum++;
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        WriteError(ex.ToString());
-        //        MessageBox.Show("Unable to grab playlist: \r" + ex.ToString());
-        //    }
-
-        //    // refresh and clear for next entry
-        //    dgv_downloads.Refresh();
-        //    txt_URL.Clear();
-        //    txt_URL.Focus();
-
-        //    // saving is good
-        //    SaveDataGridViewToCSV();
-        //    btn_GetAlbum.Enabled = true;
-        //}
-
         private async void timer1_Tick(object sender, EventArgs e)
         {
             // ensure a directory exists

@@ -2,7 +2,7 @@
 
 The software seamlessly downloads full albums from any YouTube Music playlist in the highest available MP3 format.
 
-Simply copy and paste the artist link or the album linnk from YouTube Music into YTAD. With one click, it finds the best audio sources from the related YouTube video and stitches together the full album. It's perfect for use with [Plex Music](https://www.plex.tv/plexamp/). 
+Simply copy and paste the artist link or the album link from YouTube Music into YTAD. With one click, it finds the best audio sources from the related YouTube video and stitches together the full album. It's perfect for use with [Plex Music](https://www.plex.tv/plexamp/). 
 
 ### Features
 
